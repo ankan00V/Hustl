@@ -1,0 +1,255 @@
+[
+  {
+    "name": "users",
+    "type": "auth",
+    "fields": [
+      { "name": "name", "type": "text", "required": true, "max": 80 },
+      { "name": "phone", "type": "text", "required": true, "max": 20 },
+      { "name": "role", "type": "select", "required": true, "maxSelect": 1, "values": ["STUDENT", "BUSINESS", "ADMIN"] },
+      { "name": "avatar", "type": "file", "maxSelect": 1, "maxSize": 5242880, "mimeTypes": ["image/jpeg", "image/png", "image/webp"] },
+      { "name": "bio", "type": "text", "max": 500 },
+      { "name": "reputationScore", "type": "number", "required": true, "min": 0, "max": 5 },
+      { "name": "isVerified", "type": "bool" },
+      { "name": "referralCode", "type": "text", "max": 40 },
+      { "name": "urgentSuspendedUntil", "type": "date" }
+    ],
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_users_phone ON users (phone)",
+      "CREATE UNIQUE INDEX idx_users_referral_code ON users (referralCode) WHERE referralCode != ''",
+      "CREATE INDEX idx_users_role_reputation ON users (role, reputationScore)"
+    ]
+  },
+  {
+    "name": "admin_accounts",
+    "fields": [
+      { "name": "user", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "role", "type": "select", "required": true, "maxSelect": 1, "values": ["SUPER_ADMIN", "OPS", "SUPPORT"] },
+      { "name": "active", "type": "bool" }
+    ]
+  },
+  {
+    "name": "colleges",
+    "fields": [
+      { "name": "name", "type": "text", "required": true, "max": 160 },
+      { "name": "city", "type": "text", "max": 120 },
+      { "name": "emailDomains", "type": "json", "required": true },
+      { "name": "isHustlCampus", "type": "bool" }
+    ],
+    "indexes": ["CREATE UNIQUE INDEX idx_colleges_name ON colleges (name)"]
+  },
+  {
+    "name": "student_profiles",
+    "fields": [
+      { "name": "user", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "skills", "type": "json", "required": true },
+      { "name": "portfolioUrls", "type": "json" },
+      { "name": "collegeName", "type": "text", "required": true, "max": 120 },
+      { "name": "college", "type": "relation", "collectionId": "colleges", "maxSelect": 1 },
+      { "name": "campusVerifiedAt", "type": "date" },
+      { "name": "badges", "type": "json" },
+      { "name": "completedShifts", "type": "number", "required": true, "min": 0, "onlyInt": true },
+      { "name": "availabilitySlots", "type": "json" },
+      { "name": "urgentOptIn", "type": "bool" }
+    ],
+    "indexes": ["CREATE UNIQUE INDEX idx_student_profiles_user ON student_profiles (user)"]
+  },
+  {
+    "name": "business_profiles",
+    "fields": [
+      { "name": "user", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "businessName", "type": "text", "required": true, "max": 120 },
+      { "name": "category", "type": "text", "required": true, "max": 80 },
+      { "name": "address", "type": "text", "required": true, "max": 300 },
+      { "name": "lat", "type": "number", "required": true, "min": -90, "max": 90 },
+      { "name": "lng", "type": "number", "required": true, "min": -180, "max": 180 },
+      { "name": "isVerified", "type": "bool" },
+      { "name": "currentTier", "type": "select", "required": true, "maxSelect": 1, "values": ["FREE", "PRO", "ELITE", "PRO_PLUS"] },
+      { "name": "badgeLevel", "type": "text", "max": 80 },
+      { "name": "college", "type": "relation", "collectionId": "colleges", "maxSelect": 1 }
+    ],
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_business_profiles_user ON business_profiles (user)",
+      "CREATE INDEX idx_business_profiles_category ON business_profiles (category)"
+    ]
+  },
+  {
+    "name": "listings",
+    "fields": [
+      { "name": "business", "type": "relation", "required": true, "collectionId": "business_profiles", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "title", "type": "text", "required": true, "min": 3, "max": 120 },
+      { "name": "description", "type": "editor", "required": true, "maxSize": 2000 },
+      { "name": "skills", "type": "json", "required": true },
+      { "name": "hourlyRate", "type": "number", "required": true, "min": 1, "max": 10000 },
+      { "name": "startTime", "type": "date", "required": true },
+      { "name": "endTime", "type": "date", "required": true },
+      { "name": "totalHours", "type": "number", "required": true, "min": 0 },
+      { "name": "isUrgent", "type": "bool" },
+      { "name": "verifiedBadgeOnly", "type": "bool" },
+      { "name": "status", "type": "select", "required": true, "maxSelect": 1, "values": ["OPEN", "MATCHED", "FILLED", "CLOSED"] },
+      { "name": "lat", "type": "number", "required": true, "min": -90, "max": 90 },
+      { "name": "lng", "type": "number", "required": true, "min": -180, "max": 180 },
+      { "name": "boostedUntil", "type": "date" }
+    ],
+    "indexes": [
+      "CREATE INDEX idx_listings_business_status ON listings (business, status)",
+      "CREATE INDEX idx_listings_urgent_status ON listings (isUrgent, status)",
+      "CREATE INDEX idx_listings_boosted_until ON listings (boostedUntil)"
+    ]
+  },
+  {
+    "name": "swipes",
+    "fields": [
+      { "name": "student", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "listing", "type": "relation", "required": true, "collectionId": "listings", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "direction", "type": "select", "required": true, "maxSelect": 1, "values": ["LEFT", "RIGHT"] }
+    ],
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_swipes_student_listing ON swipes (student, listing)",
+      "CREATE INDEX idx_swipes_listing_direction ON swipes (listing, direction)"
+    ]
+  },
+  {
+    "name": "matches",
+    "fields": [
+      { "name": "listing", "type": "relation", "required": true, "collectionId": "listings", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "student", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "status", "type": "select", "required": true, "maxSelect": 1, "values": ["PENDING", "ACCEPTED", "CHECKED_IN", "COMPLETED", "CANCELLED", "NO_SHOW"] },
+      { "name": "acceptedAt", "type": "date" },
+      { "name": "cancelledAt", "type": "date" },
+      { "name": "cancellationReason", "type": "text", "max": 1000 },
+      { "name": "completedAt", "type": "date" }
+    ],
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_matches_listing_student ON matches (listing, student)",
+      "CREATE INDEX idx_matches_student_status ON matches (student, status)"
+    ]
+  },
+  {
+    "name": "match_score_snapshots",
+    "fields": [
+      { "name": "listing", "type": "relation", "required": true, "collectionId": "listings", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "student", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "score", "type": "number", "required": true, "min": 0, "max": 1 },
+      { "name": "skillOverlapScore", "type": "number", "required": true, "min": 0, "max": 1 },
+      { "name": "distanceScore", "type": "number", "required": true, "min": 0, "max": 1 },
+      { "name": "pastPerformanceScore", "type": "number", "required": true, "min": 0, "max": 1 },
+      { "name": "availabilityScore", "type": "number", "required": true, "min": 0, "max": 1 },
+      { "name": "distanceMeters", "type": "number", "min": 0, "onlyInt": true }
+    ]
+  },
+  {
+    "name": "shift_checkins",
+    "fields": [
+      { "name": "match", "type": "relation", "required": true, "collectionId": "matches", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "status", "type": "select", "required": true, "maxSelect": 1, "values": ["PENDING_STUDENT", "GEO_VERIFIED", "BUSINESS_CONFIRMED", "CHECKED_OUT", "DISPUTED"] },
+      { "name": "studentCheckInAt", "type": "date" },
+      { "name": "studentCheckInDistanceM", "type": "number", "min": 0, "onlyInt": true },
+      { "name": "businessConfirmedAt", "type": "date" },
+      { "name": "studentCheckOutAt", "type": "date" },
+      { "name": "businessCheckOutAt", "type": "date" },
+      { "name": "confirmedMinutes", "type": "number", "min": 1, "max": 1440, "onlyInt": true },
+      { "name": "geoVerified", "type": "bool" }
+    ],
+    "indexes": ["CREATE UNIQUE INDEX idx_shift_checkins_match ON shift_checkins (match)"]
+  },
+  {
+    "name": "reputation_events",
+    "fields": [
+      { "name": "user", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "match", "type": "relation", "collectionId": "matches", "maxSelect": 1 },
+      { "name": "type", "type": "select", "required": true, "maxSelect": 1, "values": ["REVIEW", "LATE_CANCELLATION", "NO_SHOW", "COMPLETED_SHIFT", "ADMIN_ADJUSTMENT"] },
+      { "name": "delta", "type": "number", "required": true },
+      { "name": "reason", "type": "text", "max": 1000 }
+    ]
+  },
+  {
+    "name": "reported_matches",
+    "fields": [
+      { "name": "match", "type": "relation", "required": true, "collectionId": "matches", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "reporter", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "status", "type": "select", "required": true, "maxSelect": 1, "values": ["OPEN", "IN_REVIEW", "RESOLVED", "DISMISSED"] },
+      { "name": "reason", "type": "text", "required": true, "min": 5, "max": 1000 },
+      { "name": "assignedTo", "type": "relation", "collectionId": "admin_accounts", "maxSelect": 1 },
+      { "name": "resolvedAt", "type": "date" }
+    ]
+  },
+  {
+    "name": "dispute_threads",
+    "fields": [
+      { "name": "match", "type": "relation", "required": true, "collectionId": "matches", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "openedBy", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "status", "type": "select", "required": true, "maxSelect": 1, "values": ["OPEN", "WAITING_ON_STUDENT", "WAITING_ON_BUSINESS", "RESOLVED"] },
+      { "name": "assignedTo", "type": "relation", "collectionId": "admin_accounts", "maxSelect": 1 },
+      { "name": "resolvedAt", "type": "date" }
+    ]
+  },
+  {
+    "name": "dispute_messages",
+    "fields": [
+      { "name": "dispute", "type": "relation", "required": true, "collectionId": "dispute_threads", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "authorAdmin", "type": "relation", "collectionId": "admin_accounts", "maxSelect": 1 },
+      { "name": "body", "type": "editor", "required": true, "maxSize": 3000 }
+    ]
+  },
+  {
+    "name": "wallets",
+    "fields": [
+      { "name": "user", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "availableBalance", "type": "number", "required": true, "min": 0 },
+      { "name": "pendingBalance", "type": "number", "required": true, "min": 0 },
+      { "name": "currency", "type": "text", "required": true, "max": 3 }
+    ],
+    "indexes": ["CREATE UNIQUE INDEX idx_wallets_user ON wallets (user)"]
+  },
+  {
+    "name": "wallet_transactions",
+    "fields": [
+      { "name": "wallet", "type": "relation", "required": true, "collectionId": "wallets", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "match", "type": "relation", "collectionId": "matches", "maxSelect": 1 },
+      { "name": "type", "type": "select", "required": true, "maxSelect": 1, "values": ["SHIFT_EARNING", "PLATFORM_FEE", "WITHDRAWAL", "BOOST_PURCHASE", "MEMBERSHIP_PURCHASE", "REFERRAL_REWARD"] },
+      { "name": "status", "type": "select", "required": true, "maxSelect": 1, "values": ["PENDING", "POSTED", "FAILED", "REVERSED"] },
+      { "name": "amount", "type": "number", "required": true },
+      { "name": "platformFee", "type": "number", "required": true, "min": 0 },
+      { "name": "externalRef", "type": "text", "max": 160 },
+      { "name": "idempotencyKey", "type": "text", "required": true, "max": 160 }
+    ],
+    "indexes": ["CREATE UNIQUE INDEX idx_wallet_transactions_idempotency ON wallet_transactions (idempotencyKey)"]
+  },
+  {
+    "name": "boosts",
+    "fields": [
+      { "name": "targetType", "type": "select", "required": true, "maxSelect": 1, "values": ["STUDENT_PROFILE", "BUSINESS_LISTING"] },
+      { "name": "source", "type": "select", "required": true, "maxSelect": 1, "values": ["PAID", "REFERRAL_REWARD", "ADMIN_GRANT"] },
+      { "name": "status", "type": "select", "required": true, "maxSelect": 1, "values": ["PENDING", "ACTIVE", "EXPIRED", "CANCELLED"] },
+      { "name": "student", "type": "relation", "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "listing", "type": "relation", "collectionId": "listings", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "category", "type": "text", "max": 80 },
+      { "name": "amount", "type": "number", "required": true, "min": 0 },
+      { "name": "startsAt", "type": "date" },
+      { "name": "expiresAt", "type": "date" }
+    ]
+  },
+  {
+    "name": "portfolio_assets",
+    "fields": [
+      { "name": "student", "type": "relation", "required": true, "collectionId": "users", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "type", "type": "select", "required": true, "maxSelect": 1, "values": ["IMAGE", "VIDEO"] },
+      { "name": "cloudinaryId", "type": "text", "required": true, "max": 200 },
+      { "name": "url", "type": "url", "required": true },
+      { "name": "thumbnailUrl", "type": "url" },
+      { "name": "sortOrder", "type": "number", "required": true, "min": 0, "max": 100, "onlyInt": true }
+    ]
+  },
+  {
+    "name": "listing_analytics_daily",
+    "fields": [
+      { "name": "listing", "type": "relation", "required": true, "collectionId": "listings", "maxSelect": 1, "cascadeDelete": true },
+      { "name": "date", "type": "date", "required": true },
+      { "name": "rightSwipeCount", "type": "number", "required": true, "min": 0, "onlyInt": true },
+      { "name": "averageApplicantReputation", "type": "number", "min": 0, "max": 5 },
+      { "name": "matchRate", "type": "number", "min": 0, "max": 1 },
+      { "name": "fastestMatchingSkill", "type": "text", "max": 80 }
+    ],
+    "indexes": ["CREATE UNIQUE INDEX idx_listing_analytics_daily_listing_date ON listing_analytics_daily (listing, date)"]
+  }
+]

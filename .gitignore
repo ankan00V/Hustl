@@ -1,0 +1,22 @@
+node_modules
+.DS_Store
+.env
+.env.*
+!.env.example
+dist
+build
+.expo
+.eas
+coverage
+*.log
+ios
+android
+
+# Development progress and planning files
+IMPLEMENTATION_STATUS.md
+PHASE*_COMPLETE.md
+PRODUCT_SPEC.md
+TASK_BREAKDOWN.md
+
+# Agent skills
+.agents/

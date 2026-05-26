@@ -1,0 +1,609 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+enum UserRole {
+  STUDENT
+  BUSINESS
+  ADMIN
+}
+
+enum ListingStatus {
+  OPEN
+  POOLING
+  MATCHED
+  FILLED
+  CLOSED
+  CANCELLED
+  COMPLETED
+}
+
+enum SwipeDirection {
+  LEFT
+  RIGHT
+}
+
+enum MatchStatus {
+  APPLIED
+  PENDING
+  ACCEPTED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  CANCELLED_LATE
+  NO_SHOW
+  DISPUTED
+  AUTO_CHECKED_OUT
+}
+
+enum MembershipTier {
+  FREE
+  PRO
+  ELITE
+  PRO_PLUS
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  OPS
+  SUPPORT
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VerificationSubjectType {
+  STUDENT
+  BUSINESS
+}
+
+enum ReportStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum DisputeStatus {
+  OPEN
+  WAITING_ON_STUDENT
+  WAITING_ON_BUSINESS
+  RESOLVED
+}
+
+enum ReputationEventType {
+  REVIEW
+  LATE_CANCELLATION
+  NO_SHOW
+  COMPLETED_SHIFT
+  ADMIN_ADJUSTMENT
+}
+
+enum CheckInStatus {
+  PENDING_STUDENT
+  GEO_VERIFIED
+  BUSINESS_CONFIRMED
+  CHECKED_OUT
+  DISPUTED
+}
+
+enum WalletTransactionType {
+  ESCROW_RELEASE
+  PAYOUT
+  CANCELLATION_PENALTY
+  WITHDRAWAL
+  SHIFT_EARNING
+  PLATFORM_FEE
+  BOOST_PURCHASE
+  MEMBERSHIP_PURCHASE
+  REFERRAL_REWARD
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  POSTED
+  FAILED
+  REVERSED
+}
+
+enum BoostTargetType {
+  STUDENT_PROFILE
+  BUSINESS_LISTING
+}
+
+enum BoostSource {
+  PAID
+  REFERRAL_REWARD
+  ADMIN_GRANT
+}
+
+enum BoostStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ReferralStatus {
+  CREATED
+  SIGNED_UP
+  REWARDED
+  EXPIRED
+}
+
+enum PortfolioAssetType {
+  IMAGE
+  VIDEO
+}
+
+enum PayoutStatus {
+  REQUESTED
+  PROCESSING
+  PAID
+  FAILED
+}
+
+model User {
+  id                   String                @id @default(uuid())
+  name                 String
+  email                String?               @unique
+  phone                String                @unique
+  role                 UserRole
+  avatarUrl            String?
+  bio                  String?
+  college              String?
+  isVerified           Boolean               @default(false)
+  reputationScore      Float                 @default(5)
+  createdAt            DateTime              @default(now())
+  referralCode         String?               @unique
+  urgentSuspendedUntil DateTime?
+  adminAccount         AdminAccount?
+  businessProfile      BusinessProfile?
+  studentProfile       StudentProfile?
+  swipes               Swipe[]               @relation("StudentSwipes")
+  matches              Match[]               @relation("StudentMatches")
+  reviewsGiven         Review[]              @relation("ReviewsGiven")
+  reviewsReceived      Review[]              @relation("ReviewsReceived")
+  reputationEvents     ReputationEvent[]
+  reportsFiled         ReportedMatch[]       @relation("ReportsFiled")
+  disputesOpened       DisputeThread[]       @relation("DisputesOpened")
+  wallet               Wallet?
+  badges               Badge[]
+  verificationRequests VerificationRequest[] @relation("VerificationSubject")
+  portfolioAssets      PortfolioAsset[]
+  boosts               Boost[]               @relation("StudentBoosts")
+  sentMessages         ChatMessage[]         @relation("SentMessages")
+
+  @@index([role, reputationScore])
+  @@index([urgentSuspendedUntil])
+}
+
+model BusinessProfile {
+  userId       String                                @id
+  user         User                                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName String
+  category     String
+  address      String
+  coords       Unsupported("geography(Point,4326)")?
+  isVerified   Boolean                               @default(false)
+  badgeLevel   String?
+  campusId     String?
+  campus       College?                              @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  listings     Listing[]
+  memberships  Membership[]
+  currentTier  MembershipTier                        @default(FREE)
+
+  @@index([category])
+  @@index([campusId])
+}
+
+model StudentProfile {
+  userId            String    @id
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills            String[]
+  portfolioUrls     String[]
+  collegeName       String
+  badges            String[]
+  completedShifts   Int       @default(0)
+  availabilitySlots String[]
+  urgentOptIn       Boolean   @default(true)
+  campusId          String?
+  campus            College?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  campusVerifiedAt  DateTime?
+
+  @@index([completedShifts])
+  @@index([campusId])
+}
+
+model Listing {
+  id                String                                @id @default(uuid())
+  businessId        String
+  business          BusinessProfile                       @relation(fields: [businessId], references: [userId], onDelete: Cascade)
+  title             String
+  description       String
+  skills            String[]
+  hourlyRate        Decimal                               @db.Decimal(10, 2)
+  startTime         DateTime
+  endTime           DateTime
+  totalHours        Float
+  isUrgent          Boolean                               @default(false)
+  verifiedBadgeOnly Boolean                               @default(false)
+  status            ListingStatus                         @default(OPEN)
+  citySlug          String                                @default("unknown")
+  coords            Unsupported("geography(Point,4326)")?
+  createdAt         DateTime                              @default(now())
+  boostedUntil      DateTime?
+  swipes            Swipe[]
+  matches           Match[]
+  scoreSnapshots    MatchScoreSnapshot[]
+  boosts            Boost[]                               @relation("ListingBoosts")
+  analytics         ListingAnalyticsDaily[]
+
+  @@index([businessId, status])
+  @@index([isUrgent, status])
+  @@index([boostedUntil])
+}
+
+model Swipe {
+  id        String         @id @default(uuid())
+  studentId String
+  student   User           @relation("StudentSwipes", fields: [studentId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  direction SwipeDirection
+  createdAt DateTime       @default(now())
+
+  @@unique([studentId, listingId])
+  @@index([listingId, direction])
+}
+
+model Match {
+  id                 String              @id @default(uuid())
+  listingId          String
+  listing            Listing             @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  studentId          String
+  student            User                @relation("StudentMatches", fields: [studentId], references: [id], onDelete: Cascade)
+  status             MatchStatus         @default(PENDING)
+  appliedAt          DateTime            @default(now())
+  createdAt          DateTime            @default(now())
+  acceptedAt         DateTime?
+  checkInTime        DateTime?
+  checkOutTime       DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  completedAt        DateTime?
+  reviews            Review[]
+  checkIn            ShiftCheckIn?
+  reports            ReportedMatch[]
+  disputes           DisputeThread[]
+  walletTransactions WalletTransaction[]
+  payment            Payment?
+  chatMessages       ChatMessage[]
+
+  @@unique([listingId, studentId])
+  @@index([studentId, status])
+  @@index([listingId, status])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([matchId, createdAt])
+  @@index([matchId, readAt])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  matchId    String
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  revieweeId String
+  reviewee   User     @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@unique([matchId, reviewerId, revieweeId])
+  @@index([revieweeId, createdAt])
+}
+
+model Badge {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  earnedAt DateTime @default(now())
+  category String
+
+  @@unique([userId, name, category])
+  @@index([userId, category])
+}
+
+model Membership {
+  id              String          @id @default(uuid())
+  businessId      String
+  business        BusinessProfile @relation(fields: [businessId], references: [userId], onDelete: Cascade)
+  tier            MembershipTier
+  expiresAt       DateTime
+  listingQuota    Int
+  usedListings    Int             @default(0)
+  razorpayOrderId String?
+  createdAt       DateTime        @default(now())
+
+  @@index([businessId, tier, expiresAt])
+}
+
+model AdminAccount {
+  userId                String                @id
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role                  AdminRole
+  active                Boolean               @default(true)
+  createdAt             DateTime              @default(now())
+  verificationsReviewed VerificationRequest[] @relation("VerificationReviewer")
+  assignedReports       ReportedMatch[]       @relation("AssignedReports")
+  assignedDisputes      DisputeThread[]       @relation("AssignedDisputes")
+  messages              DisputeMessage[]
+
+  @@index([role, active])
+}
+
+model VerificationRequest {
+  id           String                  @id @default(uuid())
+  subjectId    String
+  subject      User                    @relation("VerificationSubject", fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectType  VerificationSubjectType
+  status       VerificationStatus      @default(PENDING)
+  documentUrls String[]
+  notes        String?
+  reviewedById String?
+  reviewedBy   AdminAccount?           @relation("VerificationReviewer", fields: [reviewedById], references: [userId], onDelete: SetNull)
+  reviewedAt   DateTime?
+  createdAt    DateTime                @default(now())
+
+  @@index([subjectType, status, createdAt])
+  @@index([subjectId, status])
+}
+
+model MatchScoreSnapshot {
+  id                   String   @id @default(uuid())
+  listingId            String
+  listing              Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  studentId            String
+  score                Float
+  skillOverlapScore    Float
+  distanceScore        Float
+  pastPerformanceScore Float
+  availabilityScore    Float
+  distanceMeters       Int?
+  createdAt            DateTime @default(now())
+
+  @@unique([listingId, studentId, createdAt])
+  @@index([studentId, score])
+  @@index([listingId, score])
+}
+
+model ShiftCheckIn {
+  id                      String        @id @default(uuid())
+  matchId                 String        @unique
+  match                   Match         @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  status                  CheckInStatus @default(PENDING_STUDENT)
+  studentCheckInAt        DateTime?
+  studentCheckInDistanceM Int?
+  businessConfirmedAt     DateTime?
+  studentCheckOutAt       DateTime?
+  businessCheckOutAt      DateTime?
+  confirmedMinutes        Int?
+  geoVerified             Boolean       @default(false)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model ReputationEvent {
+  id        String              @id @default(uuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchId   String?
+  type      ReputationEventType
+  delta     Float
+  reason    String?
+  createdAt DateTime            @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+}
+
+model ReportedMatch {
+  id           String        @id @default(uuid())
+  matchId      String
+  match        Match         @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  reporterId   String
+  reporter     User          @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  status       ReportStatus  @default(OPEN)
+  reason       String
+  assignedToId String?
+  assignedTo   AdminAccount? @relation("AssignedReports", fields: [assignedToId], references: [userId], onDelete: SetNull)
+  resolvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+
+  @@index([status, createdAt])
+  @@index([matchId, status])
+}
+
+model DisputeThread {
+  id           String           @id @default(uuid())
+  matchId      String
+  match        Match            @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  openedById   String
+  openedBy     User             @relation("DisputesOpened", fields: [openedById], references: [id], onDelete: Cascade)
+  status       DisputeStatus    @default(OPEN)
+  assignedToId String?
+  assignedTo   AdminAccount?    @relation("AssignedDisputes", fields: [assignedToId], references: [userId], onDelete: SetNull)
+  resolvedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  messages     DisputeMessage[]
+
+  @@index([status, createdAt])
+  @@index([matchId, status])
+}
+
+model DisputeMessage {
+  id          String        @id @default(uuid())
+  disputeId   String
+  dispute     DisputeThread @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  authorId    String?
+  authorAdmin AdminAccount? @relation(fields: [authorId], references: [userId], onDelete: SetNull)
+  body        String
+  createdAt   DateTime      @default(now())
+
+  @@index([disputeId, createdAt])
+}
+
+model Wallet {
+  userId           String              @id
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availableBalance Decimal             @default(0) @db.Decimal(10, 2)
+  pendingBalance   Decimal             @default(0) @db.Decimal(10, 2)
+  currency         String              @default("INR")
+  transactions     WalletTransaction[]
+  payouts          PayoutRequest[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
+
+model WalletTransaction {
+  id             String                  @id @default(uuid())
+  walletUserId   String
+  wallet         Wallet                  @relation(fields: [walletUserId], references: [userId], onDelete: Cascade)
+  matchId        String?
+  match          Match?                  @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  type           WalletTransactionType
+  status         WalletTransactionStatus @default(PENDING)
+  grossAmount    Decimal                 @default(0) @db.Decimal(10, 2)
+  tdsAmount      Decimal                 @default(0) @db.Decimal(10, 2)
+  netAmount      Decimal                 @default(0) @db.Decimal(10, 2)
+  amount         Decimal                 @db.Decimal(10, 2) // Legacy, mapped to netAmount
+  platformFee    Decimal                 @default(0) @db.Decimal(10, 2)
+  externalRef    String?
+  idempotencyKey String                  @unique
+  createdAt      DateTime                @default(now())
+  postedAt       DateTime?
+
+  @@index([walletUserId, createdAt])
+  @@index([matchId, type])
+}
+
+model PayoutRequest {
+  id           String       @id @default(uuid())
+  walletUserId String
+  wallet       Wallet       @relation(fields: [walletUserId], references: [userId], onDelete: Cascade)
+  amount       Decimal      @db.Decimal(10, 2)
+  status       PayoutStatus @default(REQUESTED)
+  upiId        String
+  externalRef  String?
+  createdAt    DateTime     @default(now())
+  processedAt  DateTime?
+
+  @@index([walletUserId, status])
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  matchId           String   @unique
+  match             Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  razorpayOrderId   String   @unique
+  razorpayPaymentId String?  @unique
+  amount            Decimal  @db.Decimal(10, 2)
+  status            String
+  createdAt         DateTime @default(now())
+  paidAt            DateTime?
+
+  @@index([status, createdAt])
+}
+
+model Boost {
+  id         String           @id @default(uuid())
+  targetType BoostTargetType
+  targetId   String
+  student    User?            @relation("StudentBoosts", fields: [targetId], references: [id], onDelete: Cascade, map: "Boost_student_targetId_fkey")
+  listing    Listing?         @relation("ListingBoosts", fields: [targetId], references: [id], onDelete: Cascade, map: "Boost_listing_targetId_fkey")
+  source     BoostSource
+  status     BoostStatus      @default(PENDING)
+  startsAt   DateTime
+  expiresAt  DateTime
+  createdAt  DateTime         @default(now())
+
+  @@index([targetType, targetId, status])
+  @@index([status, expiresAt])
+}
+
+model Referral {
+  id          String         @id @default(uuid())
+  referrerId  String
+  refereeId   String?
+  code        String         @unique
+  status      ReferralStatus @default(CREATED)
+  rewardType  String?
+  rewardValue String?
+  createdAt   DateTime       @default(now())
+  redeemedAt  DateTime?
+
+  @@index([referrerId, status])
+  @@index([code])
+}
+
+model College {
+  id               String            @id @default(uuid())
+  name             String            @unique
+  emailDomain      String            @unique
+  citySlug         String
+  businessProfiles BusinessProfile[]
+  studentProfiles  StudentProfile[]
+
+  @@index([citySlug])
+}
+
+model PortfolioAsset {
+  id        String              @id @default(uuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      PortfolioAssetType
+  url       String
+  caption   String?
+  createdAt DateTime            @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model ListingAnalyticsDaily {
+  id          String   @id @default(uuid())
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date
+  views       Int      @default(0)
+  swipes      Int      @default(0)
+  matches     Int      @default(0)
+  avgDistance Float?
+
+  @@unique([listingId, date])
+  @@index([listingId, date])
+}

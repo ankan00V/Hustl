@@ -1,0 +1,29 @@
+{
+  "name": "hustl",
+  "private": true,
+  "version": "0.1.0",
+  "description": "HUSTL micro-gig marketplace monorepo",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @hustl/backend --filter @hustl/mobile dev",
+    "dev:backend": "pnpm --filter @hustl/backend dev",
+    "dev:mobile": "pnpm --filter @hustl/mobile dev",
+    "dev:pocketbase": "cd apps/pocketbase && go run . serve --http=127.0.0.1:8090",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm --filter @hustl/shared --filter @hustl/ui build && pnpm --filter @hustl/backend --filter @hustl/mobile typecheck",
+    "lint": "pnpm --filter @hustl/shared --filter @hustl/ui build && pnpm --filter @hustl/backend --filter @hustl/mobile lint",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema prisma/schema.prisma",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.2",
+    "turbo": "^2.9.14",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  }
+}
