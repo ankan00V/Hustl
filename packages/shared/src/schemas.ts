@@ -30,7 +30,8 @@ export const verifyOtpSchema = z.object({
   phone: z.string().min(10).max(15),
   otp: z.string().length(6),
   name: z.string().min(2).max(80).optional(),
-  role: z.enum(USER_ROLES).optional()
+  role: z.enum(USER_ROLES).optional(),
+  referredBy: z.string().optional()
 });
 
 export const listingQuerySchema = z.object({

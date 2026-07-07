@@ -257,5 +257,3 @@ chatRouter.post(
     response.json({ markedAsRead: messageIds.length });
   })
 );
-
-// Made with Bob

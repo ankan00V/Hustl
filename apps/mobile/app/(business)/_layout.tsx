@@ -41,7 +41,7 @@ function MobileLayout() {
       }}
     >
       <TabsScreenComponent
-        name="dashboard"
+        name="index"
         options={{
           title: "Dashboard",
           tabBarIcon: ({ color, size }: any) => (
@@ -68,12 +68,27 @@ function MobileLayout() {
         }}
       />
       <TabsScreenComponent
+        name="analytics"
+        options={{
+          title: "Analytics",
+          tabBarIcon: ({ color, size }: any) => (
+            <IoniconsComponent name="bar-chart-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <TabsScreenComponent
         name="profile"
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }: any) => (
             <IoniconsComponent name="storefront-outline" size={size} color={color} />
           ),
+        }}
+      />
+      <TabsScreenComponent
+        name="chat"
+        options={{
+          href: null, // Hide from tabs
         }}
       />
     </TabsComponent>
@@ -117,4 +132,3 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 });
-

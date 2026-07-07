@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/error-handler.js";
+import analyticsRouter from "./routes/analytics.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { badgesRouter } from "./routes/badges.routes.js";
 import { boostsRouter } from "./routes/boosts.routes.js";
@@ -18,6 +19,7 @@ import { reviewsRouter } from "./routes/reviews.routes.js";
 import { swipesRouter } from "./routes/swipes.routes.js";
 import { walletRouter } from "./routes/wallet.routes.js";
 import { webhooksRouter } from "./routes/webhooks.routes.js";
+import { adminRoutes } from "./routes/admin.routes.js";
 
 export function createApp() {
   const app = express();
@@ -42,13 +44,13 @@ export function createApp() {
   app.use("/memberships", membershipsRouter);
   app.use("/badges", badgesRouter);
   app.use("/checkin", checkInRouter);
-  app.use("/chat", chatRouter);
   app.use("/wallet", walletRouter);
   app.use("/boosts", boostsRouter);
   app.use("/referrals", referralsRouter);
+  app.use("/chat", chatRouter);
+  app.use("/analytics", analyticsRouter);
+  app.use("/admin", adminRoutes);
 
   app.use(errorHandler);
   return app;
 }
-
-

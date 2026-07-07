@@ -1,77 +1,79 @@
-// ─── HUSTL Design System v2 ─────────────────────────────────────
-// Dark + Lime + Purple. Premium. Gen Z. Physical.
+// ─── HUSTL Design System v3 ─────────────────────────────────────
+// Dark + Lime + Purple. Zero shadows, borders only.
 
 export const colors = {
-  // ── Backgrounds (purple-tinted dark) ──
-  bg: "#050508",
-  surface: "#0C0B12",
-  card: "#12111A",
-  elevated: "#1A1924",
-  raised: "#23222E",
+  // ── Backgrounds ──
+  bg: "#0A0A0A",
+  surface: "#0A0A0A", // fallback to bg
+  card: "#161616",
+  elevated: "#1E1E1E",
+  raised: "#2A2A2A",
 
   // ── Primary Accent (Lime Green) ──
-  lime: "#D4FF14",
-  limeLight: "#E5FF5C",
-  limeDark: "#AACC00",
-  limeGlow: "rgba(212, 255, 20, 0.15)",
-  limeGlowStrong: "rgba(212, 255, 20, 0.30)",
+  lime: "#C8F33A",
+  limeLight: "#E5FF5C", // for legacy
+  limeDark: "#AACC00", // for legacy
+  limeGlow: "rgba(200, 243, 58, 0.15)",
+  limeGlowStrong: "rgba(200, 243, 58, 0.30)",
 
   // ── Amber Accent ──
-  amber: "#D4FF14",
-  amberGlow: "rgba(212, 255, 20, 0.15)",
-  borderAmber: "rgba(212, 255, 20, 0.30)",
+  amber: "#F59E0B",
+  amberGlow: "rgba(245, 158, 11, 0.15)",
 
   // ── Secondary Accent (Purple) ──
   purple: "#9D4EDD",
   purpleGlow: "rgba(157, 78, 221, 0.15)",
-  purpleDark: "#7B2CBF",
+  purpleDark: "#7B2CBF", // for legacy
 
   // ── Feedback ──
-  green: "#22C55E",
-  greenGlow: "rgba(34, 197, 94, 0.20)",
+  green: "#C8F33A", // Use lime for positive feedback
   red: "#EF4444",
-  redGlow: "rgba(239, 68, 68, 0.20)",
 
   // ── Text ──
-  textPrimary: "#FAFAFA",
-  textSecondary: "#A1A1AA",
-  textMuted: "#52525B",
-  textLime: "#D4FF14",
+  textPrimary: "#FFFFFF",
+  textSecondary: "#888888",
+  textMuted: "#444444",
+  textLime: "#C8F33A",
 
-  // ── Borders / Glass ──
-  border: "rgba(255, 255, 255, 0.06)",
-  borderLight: "rgba(255, 255, 255, 0.10)",
-  borderLime: "rgba(212, 255, 20, 0.30)",
-  borderPurple: "rgba(157, 78, 221, 0.25)",
-  glass: "rgba(255, 255, 255, 0.04)",
-  glassMedium: "rgba(255, 255, 255, 0.07)",
-  glassStrong: "rgba(255, 255, 255, 0.12)",
+  // ── Borders ──
+  border: "#242424",
+  borderLight: "#2A2A2A",
+  borderActive: "#C8F33A",
+  borderLime: "rgba(200, 243, 58, 0.30)",
+  glass: "rgba(255, 255, 255, 0.04)", // Use sparingly, borders preferred
 
   // ── Tab bar ──
-  tabBar: "#0A0914",
-  tabBarBorder: "rgba(255, 255, 255, 0.05)",
-  tabInactive: "#52525B",
-  tabActive: "#D4FF14",
+  tabBar: "#0A0A0A",
+  tabBarBorder: "#1A1A1A",
+  tabInactive: "#888888",
+  tabActive: "#C8F33A",
 
-  // ── Legacy compat ──
-  ink: "#FAFAFA",
-  text: "#A1A1AA",
-  muted: "#52525B",
-  line: "rgba(255, 255, 255, 0.06)",
-  wash: "#0C0B12",
-  brand: "#D4FF14",
+  // ── Icons ──
+  iconDefault: "#888888",
+  iconActive: "#C8F33A",
+
+  // ── Legacy compat (will be phased out) ──
+  ink: "#FFFFFF",
+  text: "#888888",
+  muted: "#444444",
+  line: "#242424",
+  wash: "#0A0A0A",
+  brand: "#C8F33A",
+  greenGlow: "rgba(200, 243, 58, 0.15)",
+  redGlow: "rgba(239, 68, 68, 0.15)",
+  glassMedium: "rgba(255, 255, 255, 0.08)",
 } as const;
 
 export const gradients = {
-  limeCta: ["#D4FF14", "#AACC00"] as const,
-  limeSoft: ["rgba(212, 255, 20, 0.15)", "rgba(212, 255, 20, 0.05)"] as const,
+  limeCta: ["#C8F33A", "#9D4EDD"] as const, // The Gradient CTA from prompt
+  limeSoft: ["rgba(200, 243, 58, 0.15)", "rgba(200, 243, 58, 0.05)"] as const,
   purpleGlow: ["rgba(157, 78, 221, 0.12)", "transparent"] as const,
-  heroGradient: ["#1A0B2E", "#050508"] as const,
-  cardShine: ["rgba(255, 255, 255, 0.08)", "rgba(255, 255, 255, 0)"] as const,
-  darkFade: ["#0C0B12", "#050508"] as const,
-  greenFlash: ["rgba(34, 197, 94, 0.25)", "transparent"] as const,
+  heroGradient: ["#161616", "#0A0A0A"] as const,
+  cardShine: ["rgba(255, 255, 255, 0.04)", "transparent"] as const,
+  darkFade: ["#161616", "#0A0A0A"] as const,
+  greenFlash: ["rgba(200, 243, 58, 0.25)", "transparent"] as const,
   redFlash: ["rgba(239, 68, 68, 0.25)", "transparent"] as const,
-  matchCelebration: ["rgba(212, 255, 20, 0.20)", "rgba(157, 78, 221, 0.15)", "transparent"] as const,
+  matchCelebration: ["rgba(200, 243, 58, 0.20)", "rgba(157, 78, 221, 0.15)", "transparent"] as const,
 } as const;
 
 export const typography = {
@@ -97,13 +99,14 @@ export const spacing = {
 } as const;
 
 export const radii = {
-  sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, pill: 999,
+  sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, pill: 999, full: 999,
 } as const;
 
+// Shadows are removed as per instruction. Using empty objects to prevent crashes on legacy code.
 export const shadows = {
-  card: { shadowColor: "#000", shadowOpacity: 0.6, shadowRadius: 24, shadowOffset: { width: 0, height: 10 }, elevation: 10 },
-  elevated: { shadowColor: "#000", shadowOpacity: 0.7, shadowRadius: 30, shadowOffset: { width: 0, height: 12 }, elevation: 12 },
-  glow: { shadowColor: "#D4FF14", shadowOpacity: 0.35, shadowRadius: 20, shadowOffset: { width: 0, height: 6 }, elevation: 8 },
-  urgentGlow: { shadowColor: "#EF4444", shadowOpacity: 0.4, shadowRadius: 20, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
-  purpleGlow: { shadowColor: "#9D4EDD", shadowOpacity: 0.3, shadowRadius: 16, shadowOffset: { width: 0, height: 4 }, elevation: 6 },
+  card: { shadowColor: "transparent", shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+  elevated: { shadowColor: "transparent", shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+  glow: { shadowColor: "transparent", shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+  urgentGlow: { shadowColor: "transparent", shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+  purpleGlow: { shadowColor: "transparent", shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
 } as const;

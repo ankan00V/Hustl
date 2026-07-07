@@ -27,5 +27,3 @@ const styles = StyleSheet.create({
     display: "flex",
   },
 });
-
-// Made with Bob

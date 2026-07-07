@@ -12,11 +12,10 @@ coverage
 ios
 android
 
-# Development progress and planning files
-IMPLEMENTATION_STATUS.md
-PHASE*_COMPLETE.md
-PRODUCT_SPEC.md
-TASK_BREAKDOWN.md
+# All markdown files except README.md and CONSTITUTION.md
+*.md
+!README.md
+!CONSTITUTION.md
 
 # Agent skills
 .agents/

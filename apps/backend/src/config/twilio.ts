@@ -111,5 +111,3 @@ class TwilioClient {
 }
 
 export const twilioClient = new TwilioClient();
-
-// Made with Bob

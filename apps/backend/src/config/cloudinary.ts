@@ -127,5 +127,3 @@ export function getVideoThumbnail(videoPublicId: string): string {
 }
 
 export { cloudinary };
-
-// Made with Bob

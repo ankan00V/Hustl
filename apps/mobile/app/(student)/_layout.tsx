@@ -1,17 +1,10 @@
-import { Tabs, Slot } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Tabs, Slot, Stack } from "expo-router";
+import { Zap, Heart, Grid2x2, Mail, User } from "lucide-react-native";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { DesktopSidebar, DesktopRightPanel } from "@/components/DesktopShell";
 import { colors } from "@/constants/theme";
 
 const DESKTOP_BREAKPOINT = 900;
-
-const TAB_COLORS = {
-  active: "#D4FF14",
-  inactive: "#52525B",
-  bg: "#0A0A0A",
-  border: "rgba(255, 255, 255, 0.06)",
-};
 
 function DesktopLayout() {
   return (
@@ -25,58 +18,62 @@ function DesktopLayout() {
   );
 }
 
-const TabsComponent = Tabs as any;
-const TabsScreenComponent = Tabs.Screen as any;
-const IoniconsComponent = Ionicons as any;
-
 function MobileLayout() {
   return (
-    <TabsComponent
+    <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: TAB_COLORS.active,
-        tabBarInactiveTintColor: TAB_COLORS.inactive,
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
         tabBarLabelStyle: styles.tabLabel,
       }}
     >
-      <TabsScreenComponent
+      <Tabs.Screen
         name="deck"
         options={{
-          title: "Deck",
-          tabBarIcon: ({ color, size }: any) => (
-            <IoniconsComponent name="layers-outline" size={size} color={color} />
-          ),
+          title: "Discover",
+          tabBarIcon: ({ color, size }) => <Zap size={size} color={color} />,
         }}
       />
-      <TabsScreenComponent
+      <Tabs.Screen
         name="matches"
         options={{
-          title: "Matches",
-          tabBarIcon: ({ color, size }: any) => (
-            <IoniconsComponent name="checkmark-done-outline" size={size} color={color} />
-          ),
+          title: "Saved",
+          tabBarIcon: ({ color, size }) => <Heart size={size} color={color} />,
         }}
       />
-      <TabsScreenComponent
-        name="wallet"
+      <Tabs.Screen
+        name="campus_connect"
         options={{
-          title: "Wallet",
-          tabBarIcon: ({ color, size }: any) => (
-            <IoniconsComponent name="wallet-outline" size={size} color={color} />
-          ),
+          title: "Connect",
+          tabBarIcon: ({ color, size }) => <Grid2x2 size={size} color={color} />,
         }}
       />
-      <TabsScreenComponent
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Inbox",
+          tabBarIcon: ({ color, size }) => <Mail size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }: any) => (
-            <IoniconsComponent name="person-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
-    </TabsComponent>
+      
+      {/* Hidden Routes */}
+      <Tabs.Screen name="wallet" options={{ href: null }} />
+      <Tabs.Screen name="checkin/[matchId]" options={{ href: null }} />
+      <Tabs.Screen name="match/[id]" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="search" options={{ href: null }} />
+      <Tabs.Screen name="filters" options={{ href: null }} />
+      <Tabs.Screen name="skipped" options={{ href: null }} />
+    </Tabs>
   );
 }
 
@@ -85,6 +82,9 @@ export default function StudentLayout() {
   const isDesktop = width >= DESKTOP_BREAKPOINT;
 
   if (isDesktop) return <DesktopLayout />;
+  
+  // Note: Modals and extra screens should ideally be managed via Stack if we are completely replacing the layout, 
+  // but since we are within a Tabs layout we just hide them via `href: null`.
   return <MobileLayout />;
 }
 
@@ -102,19 +102,18 @@ const desktopStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: TAB_COLORS.bg,
-    borderTopColor: TAB_COLORS.border,
+    backgroundColor: colors.tabBar,
+    borderTopColor: colors.tabBarBorder,
     borderTopWidth: 1,
-    height: 88,
-    paddingBottom: 28,
+    height: 64, // Updated height
+    paddingBottom: 8,
     paddingTop: 8,
     elevation: 0,
     shadowOpacity: 0,
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "700",
     letterSpacing: 0.5,
   },
 });
-

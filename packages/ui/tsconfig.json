@@ -5,8 +5,9 @@
     "rootDir": "src",
     "declaration": true,
     "jsx": "react-jsx",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true
   },
   "include": ["src"]
 }

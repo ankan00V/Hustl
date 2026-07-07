@@ -327,6 +327,26 @@ export const portfolioApi = {
     }),
 };
 
+// ─── Chat API ───────────────────────────────────────────────────
+export const chatApi = {
+  getMessages: (matchId: string) =>
+    api<{ messages: any[] }>(`/chat/${matchId}`),
+
+  sendMessage: (matchId: string, text: string) =>
+    api<{ message: any }>(`/chat/${matchId}`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    }),
+
+  markAsRead: (matchId: string) =>
+    api<void>(`/chat/${matchId}/read`, {
+      method: "POST",
+    }),
+
+  getUnreadCount: (matchId: string) =>
+    api<{ count: number }>(`/chat/${matchId}/unread`),
+};
+
 // ─── Devices API ────────────────────────────────────────────────
 export const devicesApi = {
   register: (pushToken: string) =>

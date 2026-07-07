@@ -3,164 +3,107 @@ import { randomBytes } from "node:crypto";
 import { sendOtpSchema, verifyOtpSchema } from "@hustl/shared";
 import { prisma } from "../config/prisma.js";
 import { redis } from "../config/redis.js";
-import { twilioClient } from "../config/twilio.js";
 import { env } from "../config/env.js";
 import { requireAuth, signToken } from "../middleware/auth.js";
-import { authRateLimiter, otpRateLimiter } from "../middleware/rate-limit.js";
+import { authRateLimiter } from "../middleware/rate-limit.js";
 import { validate } from "../middleware/validate.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { AppError } from "../utils/app-error.js";
+import { sendOtp, verifyOtp } from "../services/otp.service.js";
 
 export const authRouter = Router();
 
-/**
- * POST /auth/otp/send
- * Send OTP to phone number via Twilio Verify
- * Rate limited: 3 requests per hour per phone
- */
 authRouter.post(
-  "/otp/send",
-  otpRateLimiter,
+  "/send-otp",
+  authRateLimiter,
   validate(sendOtpSchema),
   asyncHandler(async (request, response) => {
     const { phone } = sendOtpSchema.parse(request.body);
-    
-    // Check rate limit in Redis (3 sends per hour per phone)
-    const rateLimitKey = `hustl:otp:ratelimit:${phone}`;
-    const attempts = await redis.incr(rateLimitKey);
-    
-    if (attempts === 1) {
-      await redis.expire(rateLimitKey, 3600); // 1 hour TTL
+    const success = await sendOtp(phone);
+    if (!success) {
+      throw new AppError(500, "Failed to send OTP", "OTP_SEND_FAILED");
     }
-    
-    if (attempts > 3) {
-      throw AppError.tooManyRequests("Too many OTP requests. Try again in an hour.", "OTP_RATE_LIMIT");
-    }
-    
-    // Send OTP via Twilio
-    await twilioClient.sendOTP(phone);
-    
-    response.json({
-      message: "OTP sent successfully",
-      expiresIn: 600 // 10 minutes
-    });
+    response.json({ success: true, message: "OTP sent successfully" });
   })
 );
 
-/**
- * POST /auth/otp/verify
- * Verify OTP and create/login user
- * Returns JWT access token + refresh token
- */
 authRouter.post(
-  "/otp/verify",
+  "/verify-otp",
   authRateLimiter,
   validate(verifyOtpSchema),
   asyncHandler(async (request, response) => {
     const input = verifyOtpSchema.parse(request.body);
-    
-    // Check OTP attempt count (max 3 attempts before 1hr lockout)
-    const attemptKey = `hustl:otp:attempts:${input.phone}`;
-    const attempts = await redis.incr(attemptKey);
-    
-    if (attempts === 1) {
-      await redis.expire(attemptKey, 3600); // 1 hour TTL
+    const valid = await verifyOtp(input.phone, input.otp);
+    if (!valid) {
+      throw new AppError(401, "Invalid OTP", "INVALID_OTP");
     }
-    
-    if (attempts > 3) {
-      throw AppError.tooManyRequests("Too many failed attempts. Try again in an hour.", "OTP_ATTEMPTS_EXCEEDED");
-    }
-    
-    // Verify OTP with Twilio
-    const isValid = await twilioClient.verifyOTP(input.phone, input.otp);
-    
-    if (!isValid) {
-      throw AppError.unauthorized("Invalid or expired OTP", "INVALID_OTP");
-    }
-    
-    // Clear attempt counter on successful verification
-    await redis.del(attemptKey);
-    
-    // Find or create user
-    let user = await prisma.user.findFirst({
+
+    let user = await prisma.user.findUnique({
       where: { phone: input.phone },
-      include: {
-        studentProfile: true,
-        businessProfile: true
-      }
+      select: { id: true, name: true, email: true, phone: true, role: true, reputationScore: true, referralCode: true }
     });
 
-    if (!user) {
-      // New user registration
-      if (!input.role) {
-        throw AppError.badRequest("Role is required for new user registration", "MISSING_ROLE");
-      }
-      
-      if (!input.name) {
-        throw AppError.badRequest("Name is required for new user registration", "MISSING_NAME");
-      }
-      
-      user = await prisma.user.create({
-        data: {
-          phone: input.phone,
-          name: input.name,
-          role: input.role,
-          studentProfile:
-            input.role === "STUDENT"
-              ? {
-                  create: {
-                    skills: [],
-                    portfolioUrls: [],
-                    collegeName: "",
-                    badges: [],
-                    availabilitySlots: []
-                  }
-                }
-              : undefined,
-          businessProfile:
-            input.role === "BUSINESS"
-              ? {
-                  create: {
-                    businessName: input.name,
-                    category: "Uncategorized",
-                    address: "Pending"
-                  }
-                }
-              : undefined
-        },
-        include: {
-          studentProfile: true,
-          businessProfile: true
-        }
+    if (user) {
+      response.json({
+        exists: true,
+        user,
+        token: signToken(user)
       });
+      return;
     }
-    
-    // Generate tokens
-    const accessToken = signToken(user);
-    const refreshToken = randomBytes(32).toString("hex");
-    
-    // Store refresh token in Redis (30 days TTL)
-    const refreshKey = `hustl:session:${refreshToken}`;
-    await redis.setex(
-      refreshKey,
-      30 * 24 * 60 * 60, // 30 days
-      JSON.stringify({ userId: user.id, role: user.role })
-    );
 
-    response.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        reputationScore: user.reputationScore,
-        isVerified: user.isVerified,
-        hasProfile: user.role === "STUDENT" ? Boolean(user.studentProfile) : Boolean(user.businessProfile)
+    // If user does not exist, check if name and role are provided for registration
+    if (!input.name || !input.role) {
+      response.json({
+        exists: false,
+        message: "User does not exist. Please select a role and enter your name to register."
+      });
+      return;
+    }
+
+    // Create a unique referral code
+    const referralCode = `HSTL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+    // Register user
+    user = await prisma.user.create({
+      data: {
+        name: input.name,
+        phone: input.phone,
+        role: input.role,
+        referralCode,
+        studentProfile:
+          input.role === "STUDENT"
+            ? { create: { skills: [], portfolioUrls: [], collegeName: "", badges: [], availabilitySlots: [] } }
+            : undefined,
+        businessProfile:
+          input.role === "BUSINESS"
+            ? { create: { businessName: input.name, category: "Local Business", address: "Pending" } }
+            : undefined
       },
-      accessToken,
-      refreshToken,
-      expiresIn: env.JWT_EXPIRES_IN
+      select: { id: true, name: true, email: true, phone: true, role: true, reputationScore: true, referralCode: true }
+    });
+
+    // Check if referred by another user
+    if (input.referredBy) {
+      const referrer = await prisma.user.findUnique({
+        where: { referralCode: input.referredBy }
+      });
+      if (referrer && referrer.id !== user.id) {
+        await prisma.referral.create({
+          data: {
+            referrerId: referrer.id,
+            refereeId: user.id,
+            code: input.referredBy,
+            status: "SIGNED_UP"
+          }
+        });
+      }
+    }
+
+    response.status(201).json({
+      exists: true,
+      user,
+      token: signToken(user)
     });
   })
 );

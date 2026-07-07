@@ -26,6 +26,9 @@
       "eas": {
         "projectId": "replace-with-eas-project-id"
       }
+    },
+    "experiments": {
+      "onDemandFilesystem": true
     }
   }
 }

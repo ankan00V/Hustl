@@ -6,6 +6,7 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
   extensions = [postgis]
 }
 
@@ -167,6 +168,7 @@ model User {
   createdAt            DateTime              @default(now())
   referralCode         String?               @unique
   urgentSuspendedUntil DateTime?
+  fcmToken             String?
   adminAccount         AdminAccount?
   businessProfile      BusinessProfile?
   studentProfile       StudentProfile?
@@ -217,9 +219,10 @@ model StudentProfile {
   completedShifts   Int       @default(0)
   availabilitySlots String[]
   urgentOptIn       Boolean   @default(true)
-  campusId          String?
-  campus            College?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
-  campusVerifiedAt  DateTime?
+  campusId             String?
+  campus               College?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  campusVerifiedAt     DateTime?
+  autoCheckoutWarnings Int       @default(0)
 
   @@index([completedShifts])
   @@index([campusId])
@@ -560,7 +563,7 @@ model Referral {
   id          String         @id @default(uuid())
   referrerId  String
   refereeId   String?
-  code        String         @unique
+  code        String
   status      ReferralStatus @default(CREATED)
   rewardType  String?
   rewardValue String?

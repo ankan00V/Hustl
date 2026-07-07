@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Alert, Platform, Pressable, StyleSheet, Text, View, Image, useWindowDimensions, SafeAreaView, ScrollView, TextInput } from "react-native";
+import { useState, useEffect, useRef } from "react";
+import { Alert, Platform, Pressable, StyleSheet, Text, View, Image, useWindowDimensions, SafeAreaView, ScrollView, TextInput, Animated } from "react-native";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
+// react-native-reanimated removed — using built-in Animated
 import { z } from "zod";
 import { Field } from "@/components/Field";
 import { HustlLogo } from "@/components/HustlLogo";
@@ -32,22 +32,15 @@ export default function RoleSelect() {
   const [loading, setLoading] = useState(false);
   const register = useAuthStore((s) => s.register);
   const router = useRouter();
-  const scaleAnim = useSharedValue(1);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const animatedStyle = { transform: [{ scale: scaleAnim }] };
+
   const { width } = useWindowDimensions();
   const isDesktop = width >= 900;
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scaleAnim.value }]
-    };
-  });
-
   useEffect(() => {
     if (selectedRole) {
-      scaleAnim.value = withSpring(1.02, {
-        damping: 3,
-        stiffness: 100,
-      });
+      Animated.spring(scaleAnim, { toValue: 1.02, damping: 3, stiffness: 100, useNativeDriver: true }).start();
     }
   }, [selectedRole]);
 

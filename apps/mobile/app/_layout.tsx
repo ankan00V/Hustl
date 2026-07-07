@@ -1,8 +1,12 @@
+import "../global.css";
 import { useEffect, useState } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useAuthStore } from "@/stores/auth";
+import { InAppNotification } from "@/components/InAppNotification";
+import { connectRealtime } from "@/lib/notifications";
+import * as Notifications from "expo-notifications";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, isHydrated, hydrate } = useAuthStore();
@@ -49,6 +53,30 @@ const StackComponent = Stack as any;
 const StatusBarComponent = StatusBar as any;
 
 export default function RootLayout() {
+  const { user } = useAuthStore();
+  const [toast, setToast] = useState<{ title: string; body: string; type: any } | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    // Connect to real-time socket for push notifications
+    const socket = connectRealtime(user.id);
+
+    // Listen for foreground notifications
+    const sub = Notifications.addNotificationReceivedListener((notification) => {
+      setToast({
+        title: notification.request.content.title || "New Alert",
+        body: notification.request.content.body || "",
+        type: "info"
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+      sub.remove();
+    };
+  }, [user]);
+
   return (
     <AuthGate>
       <StackComponent
@@ -58,6 +86,13 @@ export default function RootLayout() {
           animation: "fade",
         }}
       />
+      {toast && (
+        <InAppNotification 
+          id="toast-global"
+          {...toast}
+          onDismiss={() => setToast(null)}
+        />
+      )}
       <StatusBarComponent style="light" />
     </AuthGate>
   );

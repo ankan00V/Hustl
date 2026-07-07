@@ -1,22 +1,28 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors, typography, spacing } from "@/constants/theme";
 
 type ScreenProps = PropsWithChildren<{
-  title: string;
+  title?: string;
   subtitle?: string;
   scroll?: boolean;
   noPadding?: boolean;
+  rightElement?: ReactNode;
 }>;
 
-export function Screen({ title, subtitle, children, scroll = true, noPadding = false }: ScreenProps) {
+export function Screen({ title, subtitle, children, scroll = true, noPadding = false, rightElement }: ScreenProps) {
   const content = (
     <View style={[styles.content, noPadding && styles.noPad]}>
-      <View style={styles.header}>
-        <Text style={styles.brand}>HUSTL</Text>
-        <Text style={styles.title}>{title}</Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-      </View>
+      {title && (
+        <View style={styles.headerContainer}>
+          <View style={styles.header}>
+            <Text style={styles.brand}>HUSTL</Text>
+            <Text style={styles.title}>{title}</Text>
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          </View>
+          {rightElement && <View style={styles.rightElement}>{rightElement}</View>}
+        </View>
+      )}
       {children}
     </View>
   );
@@ -44,9 +50,19 @@ const styles = StyleSheet.create({
   noPad: {
     paddingHorizontal: 0,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingBottom: spacing.sm,
+  },
   header: {
     gap: spacing.sm,
-    paddingBottom: spacing.sm,
+    flex: 1,
+  },
+  rightElement: {
+    marginLeft: spacing.md,
+    marginBottom: spacing.xs,
   },
   brand: {
     color: colors.lime,

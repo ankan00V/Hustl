@@ -51,6 +51,7 @@ export interface Match {
 interface DeckState {
   // Deck
   listings: Listing[];
+  skippedListings: Listing[];
   deckIndex: number;
   isDeckLoading: boolean;
   deckError: string | null;
@@ -61,6 +62,7 @@ interface DeckState {
 
   // Actions
   setListings: (listings: Listing[]) => void;
+  addListing: (listing: Listing) => void;
   advanceDeck: () => void;
   resetDeck: () => void;
   setDeckLoading: (loading: boolean) => void;
@@ -73,6 +75,7 @@ interface DeckState {
 // ─── Deck & Matches Store ───────────────────────────────────────
 export const useDeckStore = create<DeckState>((set) => ({
   listings: [],
+  skippedListings: [],
   deckIndex: 0,
   isDeckLoading: false,
   deckError: null,
@@ -80,7 +83,14 @@ export const useDeckStore = create<DeckState>((set) => ({
   isMatchesLoading: false,
 
   setListings: (listings) => set({ listings, deckIndex: 0, deckError: null }),
-  advanceDeck: () => set((s) => ({ deckIndex: s.deckIndex + 1 })),
+  addListing: (listing) => set((s) => ({ listings: [...s.listings, listing] })),
+  advanceDeck: () => set((s) => {
+    const skipped = s.listings[s.deckIndex];
+    return {
+      deckIndex: s.deckIndex + 1,
+      skippedListings: skipped ? [...s.skippedListings, skipped] : s.skippedListings
+    };
+  }),
   resetDeck: () => set({ deckIndex: 0 }),
   setDeckLoading: (isDeckLoading) => set({ isDeckLoading }),
   setDeckError: (deckError) => set({ deckError }),

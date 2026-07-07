@@ -1,273 +1,84 @@
+import { View, Text, TouchableOpacity, ScrollView, ImageBackground, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
-import { Image, Pressable, SafeAreaView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { HustlLogo } from "@/components/HustlLogo";
-import { colors, spacing, radii, shadows } from "@/constants/theme";
+import { LucideMousePointer2, Sparkles } from "lucide-react-native";
 
-export default function Landing() {
-  const { width, height } = useWindowDimensions();
-  const isDesktop = width >= 900;
-  const heroWidth = width;
-  const heroHeight = height;
-
+export default function MobileLanding() {
   return (
-    <View style={styles.container}>
+    <ImageBackground 
+      source={{ uri: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260624_111401_56af5012-2263-45d3-849a-8688084d7c2a.png&w=1280&q=85" }} 
+      style={{ flex: 1, backgroundColor: '#000' }}
+    >
       <LinearGradient
-        colors={['#1A0B2E', '#240B3E', '#0F0520']}
-        locations={[0, 0.5, 1]}
-        style={styles.gradientBg}
-      />
-
-      <View style={styles.stage}>
-        <View style={[styles.heroFrame, { width: heroWidth, height: heroHeight }]}>
-          <Image
-            source={require('../assets/images/landing-bg.png')}
-            style={styles.backgroundImage}
-            resizeMode="cover"
-          />
-
-          <SafeAreaView style={styles.safe}>
-            <View style={StyleSheet.flatten([styles.topBar, isDesktop ? styles.topBarDesktop : undefined])}>
-              <Link href="/" asChild>
-                <Pressable style={StyleSheet.flatten([styles.logoSlot, isDesktop ? styles.logoSlotDesktop : undefined])}>
-                  <HustlLogo size="small" />
-                </Pressable>
-              </Link>
-
-              {isDesktop && (
-                <View style={styles.navLinks}>
-                  <Pressable style={styles.navLink}>
-                    <Text style={styles.navLinkText}>For Students</Text>
-                  </Pressable>
-                  <Pressable style={styles.navLink}>
-                    <Text style={styles.navLinkText}>For Businesses</Text>
-                  </Pressable>
-                  <Pressable style={styles.navLink}>
-                    <Text style={styles.navLinkText}>How it Works</Text>
-                  </Pressable>
-                  <Pressable style={styles.navLink}>
-                    <Text style={styles.navLinkText}>Pricing</Text>
-                  </Pressable>
-                  <Pressable style={styles.navLink}>
-                    <Text style={styles.navLinkText}>About</Text>
-                  </Pressable>
+        colors={['rgba(10,10,10,0.4)', 'rgba(10,10,10,0.85)', 'rgba(10,10,10,1)']}
+        locations={[0, 0.4, 1]}
+        style={{ flex: 1 }}
+      >
+        <SafeAreaView className="flex-1">
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
+            
+            {/* Header */}
+            <View className="px-6 py-6 flex-row justify-between items-center">
+              <View className="flex-row items-center gap-2">
+                <View className="w-8 h-8 rounded-full bg-[#C8F33A] items-center justify-center">
+                  <Sparkles size={16} color="#000" />
                 </View>
-              )}
+                <Text className="text-white text-xl font-bold tracking-tight">Hustl.</Text>
+              </View>
+              <Link href="/(auth)/login" asChild>
+                <TouchableOpacity className="bg-white/10 px-5 py-2.5 rounded-full border border-white/20">
+                  <Text className="text-white font-medium text-sm">Log In</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
 
-              <View style={styles.topRight}>
-                <Pressable style={styles.themeToggle}>
-                  <Text style={styles.themeIcon}>☀️</Text>
-                </Pressable>
-                <Link href="/(auth)/login" asChild>
-                  <Pressable style={styles.getAppBtn}>
-                    <LinearGradient
-                      colors={['#D4FF14', '#AACC00']}
-                      style={styles.getAppGradient}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                    >
-                      <Text style={styles.getAppBtnText}>Get the App</Text>
-                    </LinearGradient>
-                  </Pressable>
+            {/* Hero Content */}
+            <View className="flex-1 justify-end px-6 pb-12 pt-10">
+              
+              <View className="mb-2 relative">
+                <Text className="text-white text-[48px] leading-[54px] font-bold tracking-tighter">
+                  Top Student
+                </Text>
+                <Text className="text-[#C8F33A] text-[48px] leading-[54px] font-bold tracking-tighter">
+                  Talent
+                </Text>
+                <Text className="text-white text-[48px] leading-[54px] font-bold tracking-tighter">
+                  One Click Away.
+                </Text>
+
+                {/* Floating Cursor accent */}
+                <View className="absolute top-10 right-4 rotate-[-12deg] items-center">
+                  <LucideMousePointer2 size={24} fill="#9D4EDD" color="#9D4EDD" />
+                  <View className="bg-[#9D4EDD] px-2.5 py-1 rounded-full mt-1 shadow-lg">
+                    <Text className="text-white text-xs font-bold">Alex</Text>
+                  </View>
+                </View>
+              </View>
+              
+              <Text className="text-white/70 text-base leading-6 mt-6 mb-10 pr-4">
+                The elite network for university students to find flexible gigs, build real-world experience, and get paid instantly.
+              </Text>
+
+              {/* Action Buttons */}
+              <View className="gap-4">
+                <Link href="/(student)" asChild>
+                  <TouchableOpacity className="bg-[#C8F33A] px-6 py-4 rounded-full flex-row justify-center items-center shadow-[0_0_20px_rgba(200,243,58,0.3)]">
+                    <Text className="text-black text-lg font-bold">I'm a Student</Text>
+                  </TouchableOpacity>
+                </Link>
+
+                <Link href="/(business)" asChild>
+                  <TouchableOpacity className="bg-[#060218] border border-[#9D4EDD]/30 px-6 py-4 rounded-full flex-row justify-center items-center overflow-hidden">
+                    <Text className="text-white text-lg font-bold">Hire Staff Now</Text>
+                  </TouchableOpacity>
                 </Link>
               </View>
             </View>
-
-            <View style={StyleSheet.flatten([styles.ctaContainer, isDesktop ? styles.ctaContainerDesktop : undefined])}>
-              <Link href={{ pathname: "/(auth)/role-select", params: { role: "STUDENT" } }} asChild>
-                <Pressable style={styles.primaryBtn}>
-                  <LinearGradient
-                    colors={['#D4FF14', '#AACC00']}
-                    style={StyleSheet.flatten([styles.btnGradient, isDesktop ? styles.btnGradientDesktop : undefined])}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <Text style={StyleSheet.flatten([styles.primaryBtnText, isDesktop ? styles.heroBtnTextDesktop : undefined])}>I'm a Student</Text>
-                  </LinearGradient>
-                </Pressable>
-              </Link>
-              <Link href={{ pathname: "/(auth)/role-select", params: { role: "BUSINESS" } }} asChild>
-                <Pressable style={isDesktop ? styles.secondaryBtnDesktop : styles.secondaryBtn}>
-                  <Text style={StyleSheet.flatten([styles.secondaryBtnText, isDesktop ? styles.heroBtnTextDesktop : undefined])}>I'm a Business</Text>
-                </Pressable>
-              </Link>
-            </View>
-          </SafeAreaView>
-        </View>
-      </View>
-    </View>
+            
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
+    </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    position: 'relative',
-    backgroundColor: '#050508',
-  },
-  gradientBg: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  stage: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: '#030306',
-  },
-  heroFrame: {
-    position: 'relative',
-    overflow: 'hidden',
-    maxWidth: '100%',
-    maxHeight: '100%',
-  },
-  safe: {
-    flex: 1,
-    position: 'relative',
-    zIndex: 1,
-  },
-  backgroundImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-  },
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.lg,
-  },
-  topBarDesktop: {
-    paddingLeft: 88,
-    paddingRight: 84,
-    paddingTop: 4,
-    paddingBottom: 4,
-    paddingVertical: 4,
-  },
-  logoSlot: {
-    width: 136,
-    height: 80,
-    alignItems: "flex-start",
-    justifyContent: "center",
-  },
-  logoSlotDesktop: {
-    height: 60,
-    justifyContent: "center",
-  },
-  navLinks: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xl,
-    flex: 1,
-    justifyContent: "center",
-  },
-  navLink: {
-    paddingVertical: spacing.sm,
-  },
-  navLinkText: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  topRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-  },
-  themeToggle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  themeIcon: {
-    fontSize: 18,
-  },
-  getAppBtn: {
-    borderRadius: radii.pill,
-    overflow: "hidden",
-    ...shadows.glow,
-  },
-  getAppGradient: {
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  getAppBtnText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "800",
-  },
-  ctaContainer: {
-    position: 'absolute',
-    bottom: '24%',
-    left: '3.75%',
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  ctaContainerDesktop: {
-    left: 56,
-    bottom: '16%',
-  },
-  primaryBtn: {
-    borderRadius: radii.pill,
-    overflow: "hidden",
-    ...shadows.glow,
-  },
-  btnGradient: {
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.base,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  btnGradientDesktop: {
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-  },
-  primaryBtnText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  heroBtnTextDesktop: {
-    fontSize: 15,
-    fontWeight: "800",
-  },
-  secondaryBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.base,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  secondaryBtnDesktop: {
-    backgroundColor: '#0A0914',
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: radii.pill,
-    borderWidth: 1.5,
-    borderColor: '#8B5CF6',
-  },
-  secondaryBtnText: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-});
-
-// Made with Bob

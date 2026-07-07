@@ -74,5 +74,3 @@ export class AppError extends Error {
     return new AppError(500, message, code);
   }
 }
-
-// Made with Bob

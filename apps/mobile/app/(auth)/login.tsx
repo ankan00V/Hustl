@@ -4,7 +4,7 @@ import { Link, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { z } from "zod";
 import { HustlLogo } from "@/components/HustlLogo";
-import { colors, spacing } from "@/constants/theme";
+import { colors, spacing, typography, radii } from "@/constants/theme";
 import { useAuthStore } from "@/stores/auth";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,6 +22,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<'STUDENT' | 'BUSINESS'>('STUDENT');
   const [loading, setLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<'phone' | 'password' | null>(null);
   
   const login = useAuthStore((s) => s.login);
   const router = useRouter();
@@ -59,36 +60,44 @@ export default function LoginScreen() {
       <View style={styles.header}>
         {!isDesktop && (
           <Pressable style={styles.mobileLogo} onPress={() => router.replace('/')}>
-              <HustlLogo size="large" />
-            </Pressable>
+            <HustlLogo size="large" />
+          </Pressable>
         )}
-        <Text style={styles.welcomeText}>Welcome back!</Text>
-        <Text style={styles.subtitle}>Login to continue your Hustl journey</Text>
+        <Text style={styles.welcomeText}>Welcome back</Text>
       </View>
 
-      {/* Role Select Tabs */}
-      <View style={styles.tabsContainer}>
+      {/* Role Select Cards */}
+      <View style={styles.roleCardsContainer}>
         <Pressable 
-          style={[styles.tab, role === "STUDENT" ? styles.tabSelected : undefined]}
+          style={[styles.roleCard, role === "STUDENT" && styles.roleCardSelected]}
           onPress={() => setRole("STUDENT")}
         >
-          <Ionicons 
-            name="school-outline" 
-            size={18} 
-            color={role === "STUDENT" ? "#D4FF14" : "rgba(255, 255, 255, 0.4)"} 
-          />
-          <Text style={[styles.tabText, role === "STUDENT" ? styles.tabTextSelected : undefined]}>I'm a Student</Text>
+          <View style={styles.roleCardHeader}>
+            <Ionicons name="school-outline" size={24} color={role === "STUDENT" ? "#C8F33A" : "#A1A1AA"} />
+            {role === "STUDENT" && (
+              <View style={styles.checkmarkCircle}>
+                <Ionicons name="checkmark" size={14} color="#000" />
+              </View>
+            )}
+          </View>
+          <Text style={[styles.roleCardTitle, role === "STUDENT" && styles.roleCardTitleSelected]}>Student</Text>
+          <Text style={styles.roleCardDesc}>Find shifts</Text>
         </Pressable>
+        
         <Pressable 
-          style={[styles.tab, role === "BUSINESS" ? styles.tabSelected : undefined]}
+          style={[styles.roleCard, role === "BUSINESS" && styles.roleCardSelected]}
           onPress={() => setRole("BUSINESS")}
         >
-          <Ionicons 
-            name="briefcase-outline" 
-            size={18} 
-            color={role === "BUSINESS" ? "#D4FF14" : "rgba(255, 255, 255, 0.4)"} 
-          />
-          <Text style={[styles.tabText, role === "BUSINESS" ? styles.tabTextSelected : undefined]}>I'm an Employer</Text>
+          <View style={styles.roleCardHeader}>
+            <Ionicons name="briefcase-outline" size={24} color={role === "BUSINESS" ? "#C8F33A" : "#A1A1AA"} />
+            {role === "BUSINESS" && (
+              <View style={styles.checkmarkCircle}>
+                <Ionicons name="checkmark" size={14} color="#000" />
+              </View>
+            )}
+          </View>
+          <Text style={[styles.roleCardTitle, role === "BUSINESS" && styles.roleCardTitleSelected]}>Business</Text>
+          <Text style={styles.roleCardDesc}>Fill fast</Text>
         </Pressable>
       </View>
 
@@ -96,17 +105,19 @@ export default function LoginScreen() {
       <View style={styles.form}>
         {/* Phone Input */}
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Email or Phone Number</Text>
-          <View style={styles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="rgba(255, 255, 255, 0.4)" style={styles.inputIcon} />
+          <Text style={styles.inputLabel}>Phone Number</Text>
+          <View style={[styles.inputWrapper, focusedInput === 'phone' && styles.inputWrapperFocused]}>
+            <Ionicons name="call-outline" size={20} color="rgba(255, 255, 255, 0.4)" style={styles.inputIcon} />
             <TextInput
               style={styles.textInput}
-              placeholder="Enter your email or phone number"
+              placeholder="Enter your phone number"
               placeholderTextColor="rgba(255, 255, 255, 0.3)"
               value={phone}
               onChangeText={setPhone}
-              keyboardType="email-address"
+              keyboardType="phone-pad"
               autoCapitalize="none"
+              onFocus={() => setFocusedInput('phone')}
+              onBlur={() => setFocusedInput(null)}
             />
           </View>
         </View>
@@ -119,7 +130,7 @@ export default function LoginScreen() {
               <Text style={styles.forgotPasswordLink}>Forgot Password?</Text>
             </Pressable>
           </View>
-          <View style={styles.inputWrapper}>
+          <View style={[styles.inputWrapper, focusedInput === 'password' && styles.inputWrapperFocused]}>
             <Ionicons name="lock-closed-outline" size={20} color="rgba(255, 255, 255, 0.4)" style={styles.inputIcon} />
             <TextInput
               style={styles.textInput}
@@ -129,6 +140,8 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
+              onFocus={() => setFocusedInput('password')}
+              onBlur={() => setFocusedInput(null)}
             />
             <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
               <Ionicons 
@@ -142,47 +155,36 @@ export default function LoginScreen() {
 
         {/* Login Action Button */}
         <Pressable 
-          style={[styles.loginButton, loading ? styles.loginButtonDisabled : undefined]}
+          style={[styles.loginButton, loading && styles.loginButtonDisabled]}
           onPress={handleLogin}
           disabled={loading}
         >
           <LinearGradient
-            colors={loading ? ['#666', '#444'] : ['#D4FF14', '#8B5CF6']}
+            colors={loading ? ['#666', '#444'] : ['#C8F33A', '#9D4EDD']}
             style={styles.buttonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
             <Text style={styles.loginButtonText}>
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "Logging in..." : "Login →"}
             </Text>
           </LinearGradient>
         </Pressable>
 
-        {/* OR Continue With Divider */}
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or continue with</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
         {/* Social Login Buttons */}
         <View style={styles.socialRow}>
           <Pressable style={styles.socialButton}>
-            <Ionicons name="logo-google" size={18} color="#4285F4" />
+            <Ionicons name="logo-google" size={18} color="#fff" />
             <Text style={styles.socialText}>Google</Text>
           </Pressable>
           <Pressable style={styles.socialButton}>
             <Ionicons name="logo-apple" size={18} color="#fff" />
             <Text style={styles.socialText}>Apple</Text>
           </Pressable>
-          <Pressable style={styles.socialButton}>
-            <Ionicons name="logo-instagram" size={18} color="#E1306C" />
-            <Text style={styles.socialText}>Instagram</Text>
-          </Pressable>
         </View>
 
         {/* Signup Redirect Link */}
-        <Link href="/(auth)/role-select" asChild>
+        <Link href="/(auth)/signup" asChild>
           <Pressable style={styles.signupButton}>
             <Text style={styles.signupButtonText}>
               New to Hustl? <Text style={styles.signupHighlight}>Sign up</Text>
@@ -190,29 +192,13 @@ export default function LoginScreen() {
           </Pressable>
         </Link>
       </View>
-
-      {/* Bottom Security Banner */}
-      <View style={styles.securityBanner}>
-        <Ionicons name="shield-checkmark-outline" size={16} color="rgba(255, 255, 255, 0.4)" style={styles.shieldIcon} />
-        <Text style={styles.securityBannerText}>
-          Safe  •  Secure  •  Trusted by <Text style={styles.securityBannerHighlight}>50K+</Text> students
-        </Text>
-      </View>
     </>
   );
 
   if (isDesktop) {
     return (
       <View style={styles.container}>
-        {/* Background Image */}
-        <Image
-          source={require('../../assets/images/login-bg.png')}
-          style={styles.backgroundImage}
-          resizeMode="cover"
-        />
-
         <SafeAreaView style={styles.safe}>
-          {/* Clickable Logo at Top Left on Desktop */}
           {isDesktop && (
             <View style={styles.topLogoContainer}>
               <Pressable style={styles.logoPressable} onPress={() => router.replace('/')}>
@@ -237,11 +223,6 @@ export default function LoginScreen() {
   // Mobile fallback
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../assets/images/login-bg.png')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      />
       <SafeAreaView style={styles.safe}>
         <View style={styles.centerContainerMobile}>
           <ScrollView 
@@ -262,15 +243,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#050508",
   },
-  backgroundImage: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
-  },
   safe: {
     flex: 1,
     position: 'relative',
@@ -284,7 +256,6 @@ const styles = StyleSheet.create({
   logoPressable: {
     padding: spacing.xs,
   },
-  // Desktop Container aligned with right vacant purple box
   rightContainerDesktop: {
     position: 'absolute',
     left: '49%',
@@ -292,7 +263,7 @@ const styles = StyleSheet.create({
     top: '4%',
     bottom: '4%',
     justifyContent: "center",
-    alignItems: "stretch", // Stretches children to fill width
+    alignItems: "stretch",
   },
   desktopCard: {
     backgroundColor: "transparent",
@@ -300,7 +271,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "stretch",
   },
-  // Mobile Fallback container
   centerContainerMobile: {
     flex: 1,
     justifyContent: "center",
@@ -310,16 +280,8 @@ const styles = StyleSheet.create({
   mobileCard: {
     width: "100%",
     maxWidth: 420,
-    backgroundColor: "rgba(10, 5, 22, 0.85)",
-    borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: "rgba(139, 92, 246, 0.25)",
+    backgroundColor: "transparent",
     padding: spacing.lg,
-    ...Platform.select({
-      web: {
-        backdropFilter: "blur(20px)",
-      } as any,
-    }),
   },
   scrollContainerMobile: {
     flexGrow: 1,
@@ -331,71 +293,78 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: spacing.lg,
     paddingVertical: 40,
-    paddingHorizontal: 48, // Internal padding prevents clipping edge cuts
+    paddingHorizontal: 48,
     width: "100%",
   },
   header: {
     alignItems: "center",
     gap: spacing.xs,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
   },
   mobileLogo: {
     marginBottom: spacing.sm,
   },
   welcomeText: {
-    fontSize: 32,
-    fontWeight: "800",
+    fontSize: typography.displayMedium.fontSize,
+    fontWeight: typography.displayMedium.fontWeight,
+    letterSpacing: typography.displayMedium.letterSpacing,
     color: '#fff',
     textAlign: "center",
   },
-  subtitle: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.5)",
-    textAlign: "center",
-  },
-  tabsContainer: {
+  roleCardsContainer: {
     flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-    borderRadius: 14,
-    padding: 4,
-    marginVertical: spacing.xs,
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
-  tab: {
+  roleCard: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 10,
-    gap: spacing.sm,
+    backgroundColor: "#161616",
+    borderRadius: 16,
+    padding: spacing.md,
     borderWidth: 1.5,
-    borderColor: "transparent",
+    borderColor: "rgba(255, 255, 255, 0.05)",
   },
-  tabSelected: {
-    backgroundColor: "rgba(139, 92, 246, 0.08)",
-    borderColor: "rgba(139, 92, 246, 0.3)",
+  roleCardSelected: {
+    borderColor: "#C8F33A",
+    backgroundColor: "rgba(200, 243, 58, 0.05)",
   },
-  tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.4)",
+  roleCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: spacing.md,
   },
-  tabTextSelected: {
-    color: colors.lime,
-    fontWeight: "700",
+  checkmarkCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: radii.pill,
+    backgroundColor: "#C8F33A",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  roleCardTitle: {
+    fontSize: typography.headingSmall.fontSize,
+    fontWeight: typography.headingSmall.fontWeight,
+    color: "#FAFAFA",
+    marginBottom: 4,
+  },
+  roleCardTitleSelected: {
+    color: "#C8F33A",
+  },
+  roleCardDesc: {
+    fontSize: typography.bodySmall.fontSize,
+    color: "#A1A1AA",
   },
   form: {
     gap: spacing.md,
   },
   inputGroup: {
-    gap: spacing.xs,
+    gap: 8,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#FAFAFA",
   },
   passwordHeader: {
     flexDirection: "row",
@@ -405,17 +374,20 @@ const styles = StyleSheet.create({
   forgotPasswordLink: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#8B5CF6",
+    color: "#C8F33A",
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    backgroundColor: "#111111",
     borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-    borderRadius: 14,
+    borderColor: "transparent",
+    borderRadius: 12,
     paddingHorizontal: spacing.base,
     minHeight: 52,
+  },
+  inputWrapperFocused: {
+    borderColor: "#C8F33A",
   },
   inputIcon: {
     marginRight: spacing.sm,
@@ -439,81 +411,49 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonGradient: {
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   loginButtonText: {
-    color: "#fff",
+    color: "#000",
     fontSize: 16,
     fontWeight: "800",
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    marginVertical: spacing.xs,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
-  },
-  dividerText: {
-    color: "rgba(255, 255, 255, 0.35)",
-    fontSize: 12,
-    fontWeight: "500",
   },
   socialRow: {
     flexDirection: "row",
     gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   socialButton: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "#242424",
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 14,
     gap: spacing.xs,
   },
   socialText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
   },
   signupButton: {
     alignSelf: "center",
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
     paddingVertical: spacing.xs,
   },
   signupButtonText: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.4)",
+    color: "#A1A1AA",
   },
   signupHighlight: {
-    color: "#8B5CF6",
+    color: "#C8F33A",
     fontWeight: "700",
   },
-  securityBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: spacing.sm,
-    gap: spacing.xs,
-  },
-  shieldIcon: {
-    opacity: 0.6,
-  },
-  securityBannerText: {
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.5)",
-    fontWeight: "600",
-  },
-  securityBannerHighlight: {
-    color: colors.lime,
-  },
 });
+

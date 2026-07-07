@@ -8,6 +8,7 @@ import { notifyMatchStatus } from "../services/push.service.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { AppError } from "../utils/app-error.js";
 import { recalculateReputation } from "../services/reputation.service.js";
+import { createEscrowHold, refundEscrow } from "../services/escrow.service.js";
 
 export const matchesRouter = Router();
 
@@ -90,7 +91,26 @@ matchesRouter.patch(
       throw new AppError(404, "Match not found", "MATCH_NOT_FOUND");
     }
 
-    const updated = await prisma.match.update({ where: { id }, data: { status } });
+    // Create escrow hold when accepting match
+    let escrowData = null;
+    if (status === "ACCEPTED") {
+      const amount = parseFloat(match.listing.hourlyRate.toString()) * match.listing.totalHours;
+      escrowData = await createEscrowHold({
+        matchId: id,
+        amount,
+        studentId: match.studentId,
+        businessId: match.listing.businessId,
+        listingId: match.listingId,
+      });
+    }
+
+    const updated = await prisma.match.update({
+      where: { id },
+      data: {
+        status,
+        acceptedAt: status === "ACCEPTED" ? new Date() : match.acceptedAt,
+      }
+    });
 
     if (status === "COMPLETED") {
       await prisma.studentProfile.update({
@@ -101,7 +121,14 @@ matchesRouter.patch(
     }
 
     await notifyMatchStatus(match.studentId, { matchId: id, status });
-    response.json({ match: updated });
+    response.json({
+      match: updated,
+      escrow: escrowData ? {
+        orderId: escrowData.razorpayOrder.id,
+        amount: escrowData.razorpayOrder.amount,
+        currency: escrowData.razorpayOrder.currency,
+      } : null,
+    });
   })
 );
 
@@ -138,10 +165,20 @@ matchesRouter.post(
     const minutesBefore = (shiftStart.getTime() - now.getTime()) / 60000;
     const isLateCancellation = minutesBefore < 30 && minutesBefore > 0;
 
+    // Refund escrow if match was accepted
+    let refundData = null;
+    if (match.status === "ACCEPTED") {
+      refundData = await refundEscrow({
+        matchId: id,
+        reason: reason ?? "Match cancelled",
+        cancelledBy: isBusiness ? "BUSINESS" : "STUDENT",
+      });
+    }
+
     const updated = await prisma.match.update({
       where: { id },
       data: {
-        status: "CANCELLED",
+        status: isLateCancellation ? "CANCELLED_LATE" : "CANCELLED",
         cancelledAt: now,
         cancellationReason: reason ?? null,
       },
@@ -167,7 +204,11 @@ matchesRouter.post(
     const notifyUserId = isStudent ? match.listing.businessId : match.studentId;
     await notifyMatchStatus(notifyUserId, { matchId: id, status: "CANCELLED" });
 
-    response.json({ match: updated, lateCancellation: isLateCancellation });
+    response.json({
+      match: updated,
+      lateCancellation: isLateCancellation,
+      refund: refundData,
+    });
   })
 );
 
