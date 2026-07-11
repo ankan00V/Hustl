@@ -4,6 +4,13 @@ import { closeNotificationQueue } from "./jobs/notification.job.js";
 import { prisma } from "./config/prisma.js";
 import { redis } from "./config/redis.js";
 import { razorpay } from "./lib/razorpay.js";
+import {
+  queueConnection,
+  autoCheckoutQueue,
+  badgeMilestoneQueue,
+  tdsCalculationQueue,
+  pairInteractionQueue
+} from "./lib/bullmq.js";
 import http from "node:http";
 
 // MANDATORY INTEGRITY WARNING
@@ -391,6 +398,17 @@ async function runTests() {
     // Close Notification queue and worker
     await closeNotificationQueue();
     console.log("Notification queue and worker closed.");
+    // Close BullMQ queues and connection
+    try {
+      await autoCheckoutQueue.close();
+      await badgeMilestoneQueue.close();
+      await tdsCalculationQueue.close();
+      await pairInteractionQueue.close();
+      await queueConnection.quit();
+      console.log("BullMQ queues and connection closed.");
+    } catch (bullmqError) {
+      console.error("Failed to close BullMQ queues:", bullmqError);
+    }
     // Disconnect Redis
     await redis.quit();
     console.log("Redis connection closed.");
