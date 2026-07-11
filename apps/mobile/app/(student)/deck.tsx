@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+
 import {
   Zap,
   Search,
@@ -20,7 +20,6 @@ import {
   Check,
   Info,
 } from "lucide-react-native";
-import * as Haptics from "expo-haptics";
 import * as Location from "expo-location";
 import { Button } from "@hustl/ui";
 import { colors, typography, spacing, radii } from "@/constants/theme";
@@ -28,6 +27,10 @@ import { useDeckStore, type Listing } from "@/stores/deck";
 import { useAuthStore } from "@/stores/auth";
 import { listingsApi, swipesApi } from "@/lib/api";
 import { useRouter } from "expo-router";
+import { ParticleSwipe } from "@/components/ParticleSwipe";
+import { ConfettiCelebration } from "@/components/ConfettiCelebration";
+import { ShimmerCard } from "@/components/ShimmerLoader";
+import { appHaptics } from "@/lib/haptics";
 
 // ─── Constants ────────────────────────────────────────────────────
 const SWIPE_THRESHOLD = 100;
@@ -105,9 +108,8 @@ function NextCard({ item, progress }: { item: Listing; progress: Animated.Value 
     >
       <View style={sStyles.card}>
         <View style={sStyles.imagePlaceholder}>
-          <LinearGradient
-            colors={["#1E1E1E", "#141414"]}
-            style={StyleSheet.absoluteFill}
+          <View
+            style={[StyleSheet.absoluteFill, { backgroundColor: "#161616" }]}
           />
           <View style={sStyles.visualContainer}>
             <Text style={sStyles.visualEmoji}>{meta.emoji}</Text>
@@ -202,9 +204,8 @@ function SwipeCard({
 
         {/* Hero */}
         <View style={sStyles.imagePlaceholder}>
-          <LinearGradient
-            colors={["#252525", "#161616"]}
-            style={StyleSheet.absoluteFill}
+          <View
+            style={[StyleSheet.absoluteFill, { backgroundColor: "#161616" }]}
           />
           <View style={sStyles.visualContainer}>
             <Text style={sStyles.visualEmoji}>{meta.emoji}</Text>
@@ -217,9 +218,8 @@ function SwipeCard({
             </View>
           )}
           {/* Bottom gradient overlay */}
-          <LinearGradient
-            colors={["transparent", "rgba(22,22,22,0.95)"]}
-            style={sStyles.heroBottomGradient}
+          <View
+            style={[sStyles.heroBottomGradient, { backgroundColor: "transparent" }]}
             pointerEvents="none"
           />
         </View>
@@ -294,6 +294,8 @@ export default function DeckScreen() {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [lastMatch, setLastMatch] = useState<any>(null);
   const [swiping, setSwiping] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Animated values
   const pan = useRef(new Animated.ValueXY()).current;
@@ -355,9 +357,10 @@ export default function DeckScreen() {
             direction: "RIGHT",
           });
           if (result.match) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            appHaptics.deckMatch();
+            setShowConfetti(true);
             setLastMatch({ ...result.match, listing: card });
-            setShowMatchModal(true);
+            setTimeout(() => setShowMatchModal(true), 500);
           }
         } catch {
           // fail silently
@@ -375,8 +378,14 @@ export default function DeckScreen() {
       const x =
         direction === "right" ? screenWidth + 150 : -screenWidth - 150;
 
+      // Trigger particle animation
+      setSwipeDirection(direction);
+
+      // Haptic feedback
       if (direction === "right") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        appHaptics.deckSwipeRight();
+      } else {
+        appHaptics.deckSwipeLeft();
       }
 
       Animated.parallel([
@@ -470,13 +479,19 @@ export default function DeckScreen() {
         <View style={styles.topBarActions}>
           <Pressable
             style={styles.iconButton}
-            onPress={() => router.push("/skipped")}
+            onPress={() => {
+              appHaptics.buttonPress();
+              router.push("/skipped");
+            }}
           >
             <Clock size={19} color={colors.textPrimary} />
           </Pressable>
           <Pressable
             style={styles.iconButton}
-            onPress={() => router.push("/filters")}
+            onPress={() => {
+              appHaptics.buttonPress();
+              router.push("/filters");
+            }}
           >
             <SlidersHorizontal size={19} color={colors.textPrimary} />
           </Pressable>
@@ -486,7 +501,10 @@ export default function DeckScreen() {
       {/* Search Trigger */}
       <Pressable
         style={styles.searchTrigger}
-        onPress={() => router.push("/search")}
+        onPress={() => {
+          appHaptics.buttonPress();
+          router.push("/search");
+        }}
       >
         <Search size={17} color={colors.textMuted} />
         <Text style={styles.searchText}>Search roles, companies...</Text>
@@ -495,13 +513,7 @@ export default function DeckScreen() {
       {/* Deck */}
       <View style={styles.deckContainer}>
         {isDeckLoading ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>⏳</Text>
-            <Text style={styles.emptyTitle}>Finding shifts near you…</Text>
-            <Text style={styles.emptyDesc}>
-              Hang tight, loading nearby gigs.
-            </Text>
-          </View>
+          <ShimmerCard />
         ) : deckError ? (
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>😕</Text>
@@ -536,7 +548,14 @@ export default function DeckScreen() {
               New shifts drop every hour. Check back soon.
             </Text>
             <View style={{ marginTop: spacing.lg }}>
-              <Button onPress={loadListings}>Refresh</Button>
+              <Button
+                onPress={() => {
+                  appHaptics.refreshStart();
+                  loadListings();
+                }}
+              >
+                Refresh
+              </Button>
             </View>
           </View>
         )}
@@ -547,7 +566,10 @@ export default function DeckScreen() {
         <View style={styles.bottomActions}>
           <Pressable
             style={styles.actionBtnSkip}
-            onPress={() => swipeOut("left")}
+            onPress={() => {
+              appHaptics.buttonPress();
+              swipeOut("left");
+            }}
             disabled={swiping}
           >
             <X size={26} color={colors.textSecondary} />
@@ -555,7 +577,10 @@ export default function DeckScreen() {
 
           <Pressable
             style={styles.actionBtnApply}
-            onPress={() => swipeOut("right")}
+            onPress={() => {
+              appHaptics.buttonPress();
+              swipeOut("right");
+            }}
             disabled={swiping}
           >
             <Check size={30} color={colors.bg} />
@@ -563,16 +588,25 @@ export default function DeckScreen() {
         </View>
       )}
 
+      {/* Particle Animation */}
+      <ParticleSwipe
+        direction={swipeDirection}
+        onComplete={() => setSwipeDirection(null)}
+      />
+
+      {/* Confetti Celebration */}
+      <ConfettiCelebration
+        active={showConfetti}
+        onComplete={() => setShowConfetti(false)}
+      />
+
       {/* Match / Application Sent Modal */}
       {lastMatch && (
         <Modal visible={showMatchModal} transparent animationType="fade">
           <View style={mStyles.modalBg}>
             <View style={mStyles.modalContent}>
-              <LinearGradient
-                colors={["rgba(200,243,58,0.15)", "transparent"]}
-                style={StyleSheet.absoluteFill}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
+              <View
+                style={[StyleSheet.absoluteFill, { backgroundColor: "transparent" }]}
               />
               <View style={mStyles.matchIconWrapper}>
                 <Check size={38} color={colors.bg} />
@@ -612,8 +646,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
     borderRadius: radii.pill,
@@ -628,10 +662,10 @@ const styles = StyleSheet.create({
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 0,
     backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -643,8 +677,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     height: 46,
     borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
@@ -669,17 +703,17 @@ const styles = StyleSheet.create({
   actionBtnSkip: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: 0,
     backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
   actionBtnApply: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 0,
     backgroundColor: colors.lime,
     alignItems: "center",
     justifyContent: "center",
@@ -712,8 +746,8 @@ const sStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.card,
     borderRadius: radii.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     overflow: "hidden",
     marginBottom: spacing.xl,
   },
@@ -738,7 +772,7 @@ const sStyles = StyleSheet.create({
     letterSpacing: 2,
     borderWidth: 4,
     borderColor: colors.red,
-    borderRadius: 8,
+    borderRadius: 0,
     paddingHorizontal: 10,
     paddingVertical: 4,
     backgroundColor: "rgba(239, 68, 68, 0.12)",
@@ -750,7 +784,7 @@ const sStyles = StyleSheet.create({
     letterSpacing: 2,
     borderWidth: 4,
     borderColor: colors.lime,
-    borderRadius: 8,
+    borderRadius: 0,
     paddingHorizontal: 10,
     paddingVertical: 4,
     backgroundColor: "rgba(200, 243, 58, 0.12)",
@@ -816,8 +850,8 @@ const sStyles = StyleSheet.create({
     height: 48,
     borderRadius: radii.md,
     backgroundColor: colors.elevated,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -853,7 +887,7 @@ const sStyles = StyleSheet.create({
   payDot: {
     width: 3,
     height: 3,
-    borderRadius: 2,
+    borderRadius: 0,
     backgroundColor: colors.textMuted,
     marginBottom: 3,
     marginHorizontal: 2,
@@ -871,8 +905,8 @@ const sStyles = StyleSheet.create({
   },
   chip: {
     backgroundColor: colors.elevated,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     borderRadius: radii.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: 5,
@@ -909,8 +943,8 @@ const mStyles = StyleSheet.create({
   modalContent: {
     backgroundColor: colors.card,
     borderRadius: radii.xxl,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     padding: spacing.xxl,
     alignItems: "center",
     width: "100%",
@@ -919,7 +953,7 @@ const mStyles = StyleSheet.create({
   matchIconWrapper: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 0,
     backgroundColor: colors.lime,
     alignItems: "center",
     justifyContent: "center",

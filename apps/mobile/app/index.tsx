@@ -1,84 +1,148 @@
-import { View, Text, TouchableOpacity, ScrollView, ImageBackground, Image } from "react-native";
+import { useEffect, useRef } from "react";
+import { View, Text, TouchableOpacity, ScrollView, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { LucideMousePointer2, Sparkles } from "lucide-react-native";
+import { LucideMousePointer2, Sparkles, Briefcase, GraduationCap } from "lucide-react-native";
 
 export default function MobileLanding() {
-  return (
-    <ImageBackground 
-      source={{ uri: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260624_111401_56af5012-2263-45d3-849a-8688084d7c2a.png&w=1280&q=85" }} 
-      style={{ flex: 1, backgroundColor: '#000' }}
-    >
-      <LinearGradient
-        colors={['rgba(10,10,10,0.4)', 'rgba(10,10,10,0.85)', 'rgba(10,10,10,1)']}
-        locations={[0, 0.4, 1]}
-        style={{ flex: 1 }}
-      >
-        <SafeAreaView className="flex-1">
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
-            
-            {/* Header */}
-            <View className="px-6 py-6 flex-row justify-between items-center">
-              <View className="flex-row items-center gap-2">
-                <View className="w-8 h-8 rounded-full bg-[#C8F33A] items-center justify-center">
-                  <Sparkles size={16} color="#000" />
-                </View>
-                <Text className="text-white text-xl font-bold tracking-tight">Hustl.</Text>
-              </View>
-              <Link href="/(auth)/login" asChild>
-                <TouchableOpacity className="bg-white/10 px-5 py-2.5 rounded-full border border-white/20">
-                  <Text className="text-white font-medium text-sm">Log In</Text>
-                </TouchableOpacity>
-              </Link>
-            </View>
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
-            {/* Hero Content */}
-            <View className="flex-1 justify-end px-6 pb-12 pt-10">
-              
-              <View className="mb-2 relative">
-                <Text className="text-white text-[48px] leading-[54px] font-bold tracking-tighter">
-                  Top Student
+  useEffect(() => {
+    // Cursor float animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: -12,
+          duration: 2500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 2500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Pulse animation for the logo
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [floatAnim, pulseAnim]);
+
+  return (
+    <View className="flex-1 bg-[#050505]">
+
+
+      <SafeAreaView className="flex-1">
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
+          
+          {/* Header */}
+          <View className="px-6 py-6 flex-row justify-between items-center z-10">
+            <View className="flex-row items-center gap-3">
+              <Animated.View 
+                className="w-10 h-10 rounded-none items-center justify-center bg-black border-2 border-white"
+                style={{ transform: [{ scale: pulseAnim }] }}
+              >
+                <View
+                  style={{ position: 'absolute', width: '100%', height: '100%', backgroundColor: '#C8F33A', opacity: 0.2 }}
+                />
+                <Text className="text-white font-bold text-lg">H</Text>
+              </Animated.View>
+              <Text className="text-white text-2xl font-bold tracking-tight">Hustl.</Text>
+            </View>
+            <Link href="/(auth)/login" asChild>
+              <TouchableOpacity className="bg-white/10 px-5 py-2.5 rounded-none border-2 border-white">
+                <Text className="text-white font-semibold text-sm">Log In</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+
+          {/* Hero Content */}
+          <View className="flex-1 justify-center px-6 pb-12 pt-10">
+            
+            <View className="items-center mb-10 mt-8">
+              <View className="bg-white/5 border-2 border-white px-4 py-2 rounded-none mb-8 flex-row items-center gap-2">
+                <View className="w-2 h-2 rounded-none bg-[#C8F33A]" />
+                <Text className="text-white/80 font-medium text-xs tracking-wider uppercase">Future of Student Work</Text>
+              </View>
+
+              <View className="relative w-full">
+                <Text className="text-white text-[56px] leading-[62px] font-bold tracking-tighter text-center">
+                  Elite Student
                 </Text>
-                <Text className="text-[#C8F33A] text-[48px] leading-[54px] font-bold tracking-tighter">
-                  Talent
+                <Text className="text-transparent text-[56px] leading-[62px] font-bold tracking-tighter text-center">
+                  <Text style={{ color: '#C8F33A' }}>Talent</Text>
                 </Text>
-                <Text className="text-white text-[48px] leading-[54px] font-bold tracking-tighter">
-                  One Click Away.
+                <Text className="text-white text-[48px] leading-[54px] font-bold tracking-tighter text-center mt-1">
+                  Just a Click Away.
                 </Text>
 
                 {/* Floating Cursor accent */}
-                <View className="absolute top-10 right-4 rotate-[-12deg] items-center">
-                  <LucideMousePointer2 size={24} fill="#9D4EDD" color="#9D4EDD" />
-                  <View className="bg-[#9D4EDD] px-2.5 py-1 rounded-full mt-1 shadow-lg">
-                    <Text className="text-white text-xs font-bold">Alex</Text>
+                <Animated.View 
+                  className="absolute top-16 right-4 md:right-10 items-center z-10"
+                  style={{ transform: [{ translateY: floatAnim }, { rotate: '-12deg' }] }}
+                >
+                  <LucideMousePointer2 size={36} fill="#C8F33A" color="#C8F33A" />
+                  <View className="bg-[#C8F33A] px-3 py-1.5 rounded-none mt-1 border-2 border-black" style={{ shadowColor: '#000000', shadowOffset: { width: 3, height: 3 }, shadowOpacity: 1, shadowRadius: 0 }}>
+                    <Text className="text-black text-xs font-bold tracking-wide">Alex</Text>
                   </View>
-                </View>
-              </View>
-              
-              <Text className="text-white/70 text-base leading-6 mt-6 mb-10 pr-4">
-                The elite network for university students to find flexible gigs, build real-world experience, and get paid instantly.
-              </Text>
-
-              {/* Action Buttons */}
-              <View className="gap-4">
-                <Link href="/(student)" asChild>
-                  <TouchableOpacity className="bg-[#C8F33A] px-6 py-4 rounded-full flex-row justify-center items-center shadow-[0_0_20px_rgba(200,243,58,0.3)]">
-                    <Text className="text-black text-lg font-bold">I'm a Student</Text>
-                  </TouchableOpacity>
-                </Link>
-
-                <Link href="/(business)" asChild>
-                  <TouchableOpacity className="bg-[#060218] border border-[#9D4EDD]/30 px-6 py-4 rounded-full flex-row justify-center items-center overflow-hidden">
-                    <Text className="text-white text-lg font-bold">Hire Staff Now</Text>
-                  </TouchableOpacity>
-                </Link>
+                </Animated.View>
               </View>
             </View>
             
-          </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
-    </ImageBackground>
+            <Text className="text-white/60 text-lg leading-7 mt-4 mb-14 text-center px-2 font-medium">
+              Connect your business with verified, top-tier university students for flexible gigs and part-time roles.
+            </Text>
+
+            {/* Feature Cards Mini */}
+            <View className="flex-row gap-4 mb-10">
+              <View className="flex-1 bg-white/5 border-2 border-white p-4 rounded-none items-center">
+                <View className="w-10 h-10 rounded-none bg-[#C8F33A] items-center justify-center mb-3 border-2 border-black">
+                  <GraduationCap size={20} color="#000000" />
+                </View>
+                <Text className="text-white font-semibold text-center">Verified Students</Text>
+              </View>
+              <View className="flex-1 bg-white/5 border-2 border-white p-4 rounded-none items-center">
+                <View className="w-10 h-10 rounded-none bg-[#C8F33A] items-center justify-center mb-3 border-2 border-black">
+                  <Briefcase size={20} color="#000000" />
+                </View>
+                <Text className="text-white font-semibold text-center">Instant Hiring</Text>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View className="gap-4 w-full">
+              <Link href="/(business)" asChild>
+                <TouchableOpacity className="bg-[#C8F33A] w-full py-5 rounded-none flex-row justify-center items-center border-4 border-black" style={{ shadowColor: "#000000", shadowOffset: { width: 4, height: 4 }, shadowOpacity: 1, shadowRadius: 0 }}>
+                  <Text className="text-black text-lg font-bold">Hire Talent Now</Text>
+                </TouchableOpacity>
+              </Link>
+
+              <Link href="/(student)" asChild>
+                <TouchableOpacity className="bg-transparent border-4 border-white w-full py-5 rounded-none flex-row justify-center items-center" style={{ shadowColor: "#000000", shadowOffset: { width: 4, height: 4 }, shadowOpacity: 1, shadowRadius: 0 }}>
+                  <Text className="text-white text-lg font-bold tracking-wide">Find Gigs (Students)</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+          </View>
+          
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }

@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderColor: colors.border,
     borderRadius: radii.lg,
-    borderWidth: 1,
+    borderWidth: 3,
     padding: spacing.lg,
     ...shadows.card,
   },
@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
   },
   glowGreen: {
     borderColor: "rgba(34, 197, 94, 0.25)",
-    shadowColor: "#22C55E",
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "transparent",
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    shadowOffset: { width: 0, height: 0 },
   },
   noPad: {
     padding: 0,

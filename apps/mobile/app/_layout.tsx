@@ -7,6 +7,13 @@ import { useAuthStore } from "@/stores/auth";
 import { InAppNotification } from "@/components/InAppNotification";
 import { connectRealtime } from "@/lib/notifications";
 import * as Notifications from "expo-notifications";
+import { 
+  useFonts,
+  SpaceMono_400Regular,
+  SpaceMono_400Regular_Italic,
+  SpaceMono_700Bold,
+  SpaceMono_700Bold_Italic
+} from "@expo-google-fonts/space-mono";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, isHydrated, hydrate } = useAuthStore();
@@ -56,6 +63,13 @@ export default function RootLayout() {
   const { user } = useAuthStore();
   const [toast, setToast] = useState<{ title: string; body: string; type: any } | null>(null);
 
+  const [fontsLoaded] = useFonts({
+    SpaceMono_400Regular,
+    SpaceMono_400Regular_Italic,
+    SpaceMono_700Bold,
+    SpaceMono_700Bold_Italic,
+  });
+
   useEffect(() => {
     if (!user) return;
     
@@ -76,6 +90,14 @@ export default function RootLayout() {
       sub.remove();
     };
   }, [user]);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.splash}>
+        <ActivityIndicator size="large" color="#C8F33A" />
+      </View>
+    );
+  }
 
   return (
     <AuthGate>

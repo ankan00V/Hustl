@@ -60,7 +60,7 @@ export function DesktopSidebar() {
                 <Text style={[styles.navEmoji, active && styles.navEmojiActive]}>{item.emoji}</Text>
                 <Text style={[styles.navLabel, active && styles.navLabelActive]}>{item.label}</Text>
                 {item.badge > 0 && (
-                  <View style={[styles.badge, { backgroundColor: colors.purple }]}>
+                  <View style={[styles.badge, { backgroundColor: colors.lime }]}>
                     <Text style={styles.badgeText}>{item.badge}</Text>
                   </View>
                 )}
@@ -289,8 +289,8 @@ const styles = StyleSheet.create({
   sidebar: {
     width: 250,
     backgroundColor: colors.bg,
-    borderRightWidth: 1,
-    borderRightColor: "rgba(255,255,255,0.05)",
+    borderRightWidth: 4,
+    borderRightColor: "#FFFFFF",
   },
   sidebarScroll: {
     padding: spacing.lg,
@@ -308,9 +308,6 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     fontStyle: "italic",
     letterSpacing: -1,
-    textShadowColor: "white",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 1,
   },
   logoAccent: {
     color: colors.amber,
@@ -328,7 +325,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingVertical: 12,
     paddingHorizontal: spacing.md,
-    borderRadius: radii.md,
+    borderRadius: 0,
     position: "relative",
     overflow: "hidden",
   },
@@ -339,7 +336,7 @@ const styles = StyleSheet.create({
     bottom: 6,
     width: 4,
     backgroundColor: colors.amber,
-    borderRadius: 2,
+    borderRadius: 0,
   },
   navItemActive: {
     backgroundColor: "rgba(212, 255, 20, 0.05)",
@@ -349,7 +346,7 @@ const styles = StyleSheet.create({
   navLabel: { color: colors.textSecondary, fontSize: 15, fontWeight: "600", flex: 1 },
   navLabelActive: { color: colors.amber, fontWeight: "700" },
   badge: {
-    borderRadius: 10,
+    borderRadius: 0,
     minWidth: 20,
     height: 20,
     alignItems: "center",
@@ -360,10 +357,10 @@ const styles = StyleSheet.create({
   
   // Urgent
   urgentCard: {
-    backgroundColor: "rgba(157, 78, 221, 0.05)",
-    borderRadius: radii.xl,
-    borderWidth: 1,
-    borderColor: "rgba(157, 78, 221, 0.2)",
+    backgroundColor: "rgba(200, 243, 58, 0.05)",
+    borderRadius: 0,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     padding: spacing.lg,
     gap: spacing.sm,
     marginTop: "auto",
@@ -378,12 +375,11 @@ const styles = StyleSheet.create({
   urgentStar: { fontSize: 14, marginLeft: "auto" },
   urgentDesc: { color: colors.textSecondary, fontSize: 13, lineHeight: 18, marginTop: spacing.xs },
   urgentBtn: {
-    backgroundColor: colors.purple,
-    borderRadius: radii.md,
+    backgroundColor: colors.lime,
+    borderRadius: 0,
     paddingVertical: 10,
     alignItems: "center",
     marginTop: spacing.md,
-    ...shadows.glow,
   },
   urgentBtnText: { color: "white", fontSize: 14, fontWeight: "700" },
   
@@ -398,7 +394,7 @@ const styles = StyleSheet.create({
   userAvatar: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 0,
     backgroundColor: "rgba(255,255,255,0.1)",
     alignItems: "center",
     justifyContent: "center",
@@ -418,8 +414,8 @@ const styles = StyleSheet.create({
   rightPanel: {
     width: 320,
     backgroundColor: colors.bg,
-    borderLeftWidth: 1,
-    borderLeftColor: "rgba(255,255,255,0.05)",
+    borderLeftWidth: 4,
+    borderLeftColor: "#FFFFFF",
   },
   rightScroll: {
     padding: spacing.xl,
@@ -427,9 +423,9 @@ const styles = StyleSheet.create({
   },
   rpCard: {
     backgroundColor: "rgba(255,255,255,0.03)",
-    borderRadius: radii.xl,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderRadius: 0,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
     padding: spacing.lg,
     gap: spacing.md,
   },
@@ -444,22 +440,22 @@ const styles = StyleSheet.create({
   },
   rpLabel: { color: "white", fontSize: 16, fontWeight: "700" },
   rpIconChevron: { color: colors.textMuted, fontSize: 20 },
-  viewAllText: { color: colors.purple, fontSize: 13, fontWeight: "600" },
+  viewAllText: { color: colors.lime, fontSize: 13, fontWeight: "600" },
   
   // Progress
   rpProgressHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.sm },
   rpLevelTitle: { color: "white", fontSize: 14, fontWeight: "600" },
   rpXP: { color: colors.textMuted, fontSize: 12, fontWeight: "500" },
-  rpTrack: { height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.1)", overflow: "hidden" },
-  rpFill: { height: "100%", borderRadius: 3, backgroundColor: colors.amber },
+  rpTrack: { height: 6, borderRadius: 0, backgroundColor: "rgba(255,255,255,0.1)", overflow: "hidden" },
+  rpFill: { height: "100%", borderRadius: 0, backgroundColor: colors.amber },
   
-  badgeProgressContainer: { flexDirection: "row", gap: spacing.md, alignItems: "center", marginTop: spacing.md, backgroundColor: "rgba(157,78,221,0.1)", padding: spacing.md, borderRadius: radii.lg, borderWidth: 1, borderColor: "rgba(157,78,221,0.2)" },
-  badgeIconBg: { width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
+  badgeProgressContainer: { flexDirection: "row", gap: spacing.md, alignItems: "center", marginTop: spacing.md, backgroundColor: "rgba(200, 243, 58, 0.1)", padding: spacing.md, borderRadius: 0, borderWidth: 3, borderColor: "#FFFFFF" },
+  badgeIconBg: { width: 44, height: 44, borderRadius: 0, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
   badgeIconText: { fontSize: 24 },
   badgeProgressInfo: { flex: 1, gap: 2 },
   badgeProgressName: { color: "white", fontSize: 13, fontWeight: "700" },
   badgeProgressDesc: { color: colors.textMuted, fontSize: 11, lineHeight: 14 },
-  badgeProgressTrackContainer: { marginTop: -spacing.md, paddingHorizontal: spacing.md, paddingBottom: spacing.md, backgroundColor: "rgba(157,78,221,0.1)", borderBottomLeftRadius: radii.lg, borderBottomRightRadius: radii.lg, borderLeftWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderColor: "rgba(157,78,221,0.2)" },
+  badgeProgressTrackContainer: { marginTop: -spacing.md, paddingHorizontal: spacing.md, paddingBottom: spacing.md, backgroundColor: "rgba(200, 243, 58, 0.1)", borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderLeftWidth: 3, borderRightWidth: 3, borderBottomWidth: 3, borderColor: "#FFFFFF" },
   badgeProgressText: { color: colors.textMuted, fontSize: 11, textAlign: "right", marginTop: spacing.xs },
   
   // Stats
@@ -489,10 +485,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.05)",
   },
   rpBarDot: {
-    width: 8, height: 8, borderRadius: 4, backgroundColor: colors.purple,
+    width: 8, height: 8, borderRadius: 0, backgroundColor: colors.lime,
     position: "absolute",
     zIndex: 2,
-    ...shadows.glow,
   },
   rpBarDay: { color: colors.textMuted, fontSize: 11, fontWeight: "500", marginTop: "auto" },
   
@@ -500,7 +495,7 @@ const styles = StyleSheet.create({
   badgeShield: {
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 0,
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
@@ -515,15 +510,15 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     backgroundColor: "rgba(255,255,255,0.02)",
     padding: spacing.md,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: 0,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
   },
   shiftDateBox: {
     backgroundColor: "rgba(212, 255, 20, 0.1)",
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    borderRadius: radii.sm,
+    borderRadius: 0,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -555,10 +550,9 @@ const styles = StyleSheet.create({
   },
   miniBtn: {
     backgroundColor: colors.lime,
-    borderRadius: radii.sm,
+    borderRadius: 0,
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
-    ...shadows.glow,
   },
   miniBtnText: {
     color: "#000",
@@ -568,17 +562,17 @@ const styles = StyleSheet.create({
   rpTrendLabel: { color: colors.textSecondary, fontSize: 13, fontWeight: "500", marginTop: 2 },
   shiftList: { gap: spacing.md, marginTop: spacing.sm },
   miniShiftRow: { flexDirection: "row", alignItems: "center", gap: spacing.md, paddingVertical: spacing.xs },
-  miniShiftIconBg: { width: 40, height: 40, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  miniShiftIconBg: { width: 40, height: 40, borderRadius: 0, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   miniShiftIcon: { fontSize: 18 },
   miniShiftInfo: { flex: 1, gap: 2 },
   miniShiftCompany: { color: "white", fontSize: 13, fontWeight: "600" },
   miniShiftTime: { color: colors.textMuted, fontSize: 11 },
   viewAllRow: { paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)", alignItems: "center", marginTop: spacing.md },
   matchesAvatarRow: { flexDirection: "row", alignItems: "center", paddingVertical: spacing.sm },
-  matchesAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#1A1A1A", borderWidth: 2, borderColor: colors.bg, alignItems: "center", justifyContent: "center" },
+  matchesAvatar: { width: 44, height: 44, borderRadius: 0, backgroundColor: "#1A1A1A", borderWidth: 2, borderColor: colors.bg, alignItems: "center", justifyContent: "center" },
   matchesAvatarText: { color: "white", fontSize: 14, fontWeight: "700" },
   matchesAvatarMore: { backgroundColor: "rgba(255,255,255,0.1)", borderColor: colors.bg },
   matchesAvatarTextMore: { color: "white", fontSize: 12, fontWeight: "700" },
-  badgeHex: { width: 56, height: 64, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center", borderRadius: 8, borderWidth: 1, borderColor: "rgba(212, 255, 20, 0.2)" },
+  badgeHex: { width: 56, height: 64, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center", borderRadius: 0, borderWidth: 1, borderColor: "rgba(212, 255, 20, 0.2)" },
   badgeHexEmoji: { fontSize: 24 },
 });

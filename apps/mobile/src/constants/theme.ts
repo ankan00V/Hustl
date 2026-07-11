@@ -36,8 +36,8 @@ export const colors = {
   textLime: "#C8F33A",
 
   // ── Borders ──
-  border: "#242424",
-  borderLight: "#2A2A2A",
+  border: "#FFFFFF",
+  borderLight: "#FFFFFF",
   borderActive: "#C8F33A",
   borderLime: "rgba(200, 243, 58, 0.30)",
   glass: "rgba(255, 255, 255, 0.04)", // Use sparingly, borders preferred
@@ -65,33 +65,33 @@ export const colors = {
 } as const;
 
 export const gradients = {
-  limeCta: ["#C8F33A", "#9D4EDD"] as const, // The Gradient CTA from prompt
-  limeSoft: ["rgba(200, 243, 58, 0.15)", "rgba(200, 243, 58, 0.05)"] as const,
-  purpleGlow: ["rgba(157, 78, 221, 0.12)", "transparent"] as const,
-  heroGradient: ["#161616", "#0A0A0A"] as const,
-  cardShine: ["rgba(255, 255, 255, 0.04)", "transparent"] as const,
-  darkFade: ["#161616", "#0A0A0A"] as const,
-  greenFlash: ["rgba(200, 243, 58, 0.25)", "transparent"] as const,
-  redFlash: ["rgba(239, 68, 68, 0.25)", "transparent"] as const,
-  matchCelebration: ["rgba(200, 243, 58, 0.20)", "rgba(157, 78, 221, 0.15)", "transparent"] as const,
+  limeCta: ["#C8F33A", "#C8F33A"] as const, // Remove purple CTA mix
+  limeSoft: ["#0A0A0A", "#0A0A0A"] as const,
+  purpleGlow: ["transparent", "transparent"] as const,
+  heroGradient: ["#0A0A0A", "#0A0A0A"] as const,
+  cardShine: ["transparent", "transparent"] as const,
+  darkFade: ["#0A0A0A", "#0A0A0A"] as const,
+  greenFlash: ["transparent", "transparent"] as const,
+  redFlash: ["transparent", "transparent"] as const,
+  matchCelebration: ["#0A0A0A", "#0A0A0A"] as const,
 } as const;
 
 export const typography = {
-  displayLarge: { fontSize: 48, fontWeight: "900" as const, letterSpacing: -1.5, lineHeight: 52 },
-  displayMedium: { fontSize: 36, fontWeight: "900" as const, letterSpacing: -1, lineHeight: 40 },
-  headingLarge: { fontSize: 28, fontWeight: "800" as const, letterSpacing: -0.5, lineHeight: 34 },
-  headingMedium: { fontSize: 22, fontWeight: "800" as const, letterSpacing: -0.3, lineHeight: 28 },
-  headingSmall: { fontSize: 18, fontWeight: "700" as const, letterSpacing: 0, lineHeight: 24 },
-  bodyLarge: { fontSize: 17, fontWeight: "400" as const, lineHeight: 25 },
-  bodyMedium: { fontSize: 15, fontWeight: "400" as const, lineHeight: 22 },
-  bodySmall: { fontSize: 13, fontWeight: "400" as const, lineHeight: 18 },
-  monoLarge: { fontSize: 24, fontWeight: "700" as const, fontFamily: "monospace" as const, letterSpacing: -0.5 },
-  monoMedium: { fontSize: 16, fontWeight: "600" as const, fontFamily: "monospace" as const },
-  monoSmall: { fontSize: 13, fontWeight: "600" as const, fontFamily: "monospace" as const },
-  monoXL: { fontSize: 32, fontWeight: "800" as const, fontFamily: "monospace" as const, letterSpacing: -1 },
-  label: { fontSize: 14, fontWeight: "700" as const, letterSpacing: 0.5, textTransform: "uppercase" as const },
-  labelSmall: { fontSize: 11, fontWeight: "800" as const, letterSpacing: 1, textTransform: "uppercase" as const },
-  button: { fontSize: 16, fontWeight: "700" as const, letterSpacing: 0.3 },
+  displayLarge: { fontSize: 48, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: -1.5, lineHeight: 52 },
+  displayMedium: { fontSize: 36, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: -1, lineHeight: 40 },
+  headingLarge: { fontSize: 28, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: -0.5, lineHeight: 34 },
+  headingMedium: { fontSize: 22, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: -0.3, lineHeight: 28 },
+  headingSmall: { fontSize: 18, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: 0, lineHeight: 24 },
+  bodyLarge: { fontSize: 17, fontWeight: "400" as const, fontFamily: "SpaceMono_400Regular" as const, lineHeight: 25 },
+  bodyMedium: { fontSize: 15, fontWeight: "400" as const, fontFamily: "SpaceMono_400Regular" as const, lineHeight: 22 },
+  bodySmall: { fontSize: 13, fontWeight: "400" as const, fontFamily: "SpaceMono_400Regular" as const, lineHeight: 18 },
+  monoLarge: { fontSize: 24, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: -0.5 },
+  monoMedium: { fontSize: 16, fontWeight: "400" as const, fontFamily: "SpaceMono_400Regular" as const },
+  monoSmall: { fontSize: 13, fontWeight: "400" as const, fontFamily: "SpaceMono_400Regular" as const },
+  monoXL: { fontSize: 32, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: -1 },
+  label: { fontSize: 14, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: 0.5, textTransform: "uppercase" as const },
+  labelSmall: { fontSize: 11, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: 1, textTransform: "uppercase" as const },
+  button: { fontSize: 16, fontWeight: "700" as const, fontFamily: "SpaceMono_700Bold" as const, letterSpacing: 0.3 },
 } as const;
 
 export const spacing = {
@@ -99,7 +99,7 @@ export const spacing = {
 } as const;
 
 export const radii = {
-  sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, pill: 999, full: 999,
+  sm: 0, md: 0, lg: 0, xl: 0, xxl: 0, pill: 0, full: 0,
 } as const;
 
 // Shadows are removed as per instruction. Using empty objects to prevent crashes on legacy code.

@@ -19,7 +19,8 @@
     "plugins": [
       "expo-router",
       "expo-notifications",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "extra": {
       "apiUrl": "http://localhost:4000",

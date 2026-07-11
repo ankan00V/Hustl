@@ -9,7 +9,7 @@ import { WithdrawalSheet } from "@/components/WithdrawalSheet";
 const TX_LABELS: Record<string, any> = {
   PAYOUT: { label: "Withdrawal", color: colors.textPrimary, prefix: "-", icon: ArrowUpRight },
   SHIFT_PAY: { label: "Shift Earnings", color: colors.lime, prefix: "+", icon: ArrowDownLeft },
-  BONUS: { label: "Performance Bonus", color: colors.purple, prefix: "+", icon: Award },
+  BONUS: { label: "Performance Bonus", color: colors.lime, prefix: "+", icon: Award },
 };
 
 export default function WalletScreen() {
@@ -178,8 +178,8 @@ const styles = StyleSheet.create({
   },
   balanceCard: {
     backgroundColor: colors.card,
-    borderRadius: radii.xl,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 3,
     borderColor: colors.border,
     padding: spacing.xl,
     marginBottom: spacing.lg,
@@ -202,11 +202,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   trendBadge: {
-    backgroundColor: "rgba(200, 243, 58, 0.1)",
-    borderRadius: radii.pill,
+    backgroundColor: colors.bg,
+    borderRadius: 0,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
-    borderWidth: 1,
+    borderWidth: 3,
     borderColor: colors.lime,
   },
   trendText: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   },
   withdrawBtn: {
     backgroundColor: colors.lime,
-    borderRadius: radii.pill,
+    borderRadius: 0,
     paddingVertical: spacing.md,
     alignItems: "center",
   },
@@ -228,8 +228,8 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: "row",
     backgroundColor: colors.card,
-    borderRadius: radii.xl,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 3,
     borderColor: colors.border,
     paddingVertical: spacing.lg,
     marginBottom: spacing.xl,
@@ -251,8 +251,8 @@ const styles = StyleSheet.create({
   },
   chartCard: {
     backgroundColor: colors.card,
-    borderRadius: radii.xl,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 3,
     borderColor: colors.border,
     padding: spacing.lg,
     marginBottom: spacing.xl,
@@ -280,14 +280,14 @@ const styles = StyleSheet.create({
     width: "100%",
     flex: 1,
     backgroundColor: colors.elevated,
-    borderRadius: radii.sm,
+    borderRadius: 0,
     justifyContent: "flex-end",
     overflow: "hidden",
   },
   barFill: {
     width: "100%",
     backgroundColor: colors.lime,
-    borderRadius: radii.sm,
+    borderRadius: 0,
   },
   barLabel: {
     color: colors.textSecondary,
@@ -303,8 +303,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.card,
     padding: spacing.lg,
-    borderRadius: radii.lg,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 3,
     borderColor: colors.border,
   },
   txRowLeft: {
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   txIconBox: {
     width: 48,
     height: 48,
-    borderRadius: radii.full,
+    borderRadius: 0,
     backgroundColor: colors.elevated,
     alignItems: "center",
     justifyContent: "center",
