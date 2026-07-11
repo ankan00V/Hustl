@@ -8,6 +8,7 @@
     "dev": "pnpm --parallel --filter @hustl/backend --filter @hustl/mobile dev",
     "dev:backend": "pnpm --filter @hustl/backend dev",
     "dev:mobile": "pnpm --filter @hustl/mobile dev",
+    "dev:web": "pnpm --filter hustl-web dev",
     "dev:pocketbase": "cd apps/pocketbase && go run . serve --http=127.0.0.1:8090",
     "build": "pnpm -r build",
     "typecheck": "pnpm --filter @hustl/shared --filter @hustl/ui build && pnpm --filter @hustl/backend --filter @hustl/mobile typecheck",

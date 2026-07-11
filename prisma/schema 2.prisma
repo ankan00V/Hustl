@@ -168,9 +168,6 @@ model User {
   createdAt            DateTime              @default(now())
   referralCode         String?               @unique
   urgentSuspendedUntil DateTime?
-  fcmToken             String?
-  videoProfileUrl      String?
-  videoProfilePublicId String?
   adminAccount         AdminAccount?
   businessProfile      BusinessProfile?
   studentProfile       StudentProfile?
@@ -221,10 +218,9 @@ model StudentProfile {
   completedShifts   Int       @default(0)
   availabilitySlots String[]
   urgentOptIn       Boolean   @default(true)
-  campusId             String?
-  campus               College?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
-  campusVerifiedAt     DateTime?
-  autoCheckoutWarnings Int       @default(0)
+  campusId          String?
+  campus            College?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  campusVerifiedAt  DateTime?
 
   @@index([completedShifts])
   @@index([campusId])
@@ -565,7 +561,7 @@ model Referral {
   id          String         @id @default(uuid())
   referrerId  String
   refereeId   String?
-  code        String
+  code        String         @unique
   status      ReferralStatus @default(CREATED)
   rewardType  String?
   rewardValue String?
