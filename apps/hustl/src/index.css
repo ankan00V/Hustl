@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "PP Neue Montreal", sans-serif;
+  --font-serif: "PP Mondwest", serif;
+  --font-mono: "Space Mono", monospace;
+  --color-navy-900: #051A24;
+  --color-navy-800: #0D212C;
+  --animate-marquee: marquee 20s linear infinite;
+  --color-neo-green: #C8F33A;
+  --color-neo-pink: #FF007F;
+  --color-neo-blue: #00F0FF;
+  --color-neo-yellow: #FFE600;
+  --color-neo-bg: #F3F0E8;
+  --color-neo-black: #000000;
+  --color-neo-white: #FFFFFF;
+  --shadow-brutal: 4px 4px 0px 0px #000000;
+  --shadow-brutal-lg: 8px 8px 0px 0px #000000;
+  --shadow-brutal-xl: 12px 12px 0px 0px #000000;
+  --shadow-brutal-pink: 8px 8px 0px 0px #FF007F;
+  --shadow-brutal-green: 8px 8px 0px 0px #C8F33A;
+  --shadow-brutal-blue: 8px 8px 0px 0px #00F0FF;
+  --font-geist-pixel: "Geist Pixel", monospace;
+}
+
+@utility border-brutal {
+  border: 4px solid #000000;
+}
+
+@utility border-brutal-thick {
+  border: 8px solid #000000;
+}
+
+@utility active-translate-brutal {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  &:active {
+    transform: translate(6px, 6px);
+    box-shadow: none !important;
+  }
+}
+
+@utility btn-brutal {
+  border: 6px solid #000000;
+  box-shadow: 8px 8px 0px 0px #000000;
+  transition: all 150ms ease-in-out;
+  border-radius: 0;
+  text-transform: uppercase;
+  font-weight: 900;
+  &:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px 0px #000000;
+  }
+  &:active {
+    transform: translate(8px, 8px);
+    box-shadow: 0px 0px 0px 0px #000000 !important;
+  }
+}
+
+@utility card-brutal {
+  border: 6px solid #000000;
+  box-shadow: 12px 12px 0px 0px #000000;
+  border-radius: 0;
+  transition: all 150ms ease-in-out;
+  &:hover {
+    transform: translate(-6px, -6px);
+    box-shadow: 18px 18px 0px 0px #000000;
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@font-face {
+  font-family: 'Geist Pixel';
+  src: url('/fonts/GeistPixel-Square.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('https://assets.website-files.com/6009ec8cda7f305645c9d91b/60176f9bb43e36419997ecfe_PPNeueMontreal-Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('https://assets.website-files.com/6009ec8cda7f305645c9d91b/60176f9cc0c3cb4620023a1a_PPNeueMontreal-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('https://assets.website-files.com/6009ec8cda7f305645c9d91b/60176f9c968fcc050d276d33_PPNeueMontreal-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Mondwest';
+  src: url('https://raw.githubusercontent.com/dat-fonts/pp-mondwest/main/PPMondwest-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  body {
+    background-color: #F3F0E8;
+    color: #000000;
+    font-family: 'PP Neue Montreal', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+}
+
+/* Smooth scrolling with Lenis */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Ticker mask for infinite marquee */
+.ticker-mask {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 10%,
+    black 90%,
+    transparent 100%
+  );
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C8F33A;
+}
+
+/* Selection color */
+::selection {
+  background-color: #C8F33A;
+  color: #000000;
+}
+
+::-moz-selection {
+  background-color: #C8F33A;
+  color: #000000;
+}
