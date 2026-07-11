@@ -9,7 +9,13 @@ node_modules/
 # Build outputs
 dist/
 build/
+.expo/
+.eas/
 coverage/
+
+# Expo Native (generated)
+apps/mobile/ios/
+apps/mobile/android/
 
 # Logs
 *.log
