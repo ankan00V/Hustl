@@ -6,6 +6,7 @@ import { validate } from "../middleware/validate.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { AppError } from "../utils/app-error.js";
 import { emitToChat } from "../realtime/socket.js";
+import { logger } from "../utils/logger.js";
 
 export const chatRouter = Router();
 
@@ -45,7 +46,7 @@ chatRouter.get(
       throw AppError.forbidden("You are not part of this match");
     }
 
-    // Build cursor-based pagination query
+    // Build cursor-based pagination query with optimized select
     const messages = await prisma.chatMessage.findMany({
       where: {
         matchId,
@@ -53,7 +54,12 @@ chatRouter.get(
       },
       orderBy: { createdAt: "desc" },
       take: limit,
-      include: {
+      select: {
+        id: true,
+        body: true,
+        createdAt: true,
+        readAt: true,
+        senderId: true,
         sender: {
           select: {
             id: true,
@@ -67,8 +73,8 @@ chatRouter.get(
 
     // Mark messages as read
     const unreadMessageIds = messages
-      .filter((msg) => msg.senderId !== userId && !msg.readAt)
-      .map((msg) => msg.id);
+      .filter((msg: any) => msg.senderId !== userId && !msg.readAt)
+      .map((msg: any) => msg.id);
 
     if (unreadMessageIds.length > 0) {
       await prisma.chatMessage.updateMany({
@@ -129,23 +135,35 @@ chatRouter.post(
       );
     }
 
-    // Create message
-    const message = await prisma.chatMessage.create({
-      data: {
-        matchId,
-        senderId: userId,
-        body
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            avatarUrl: true,
-            role: true
+    // Create message with transaction for consistency
+    const message = await prisma.$transaction(async (tx: any) => {
+      const newMessage = await tx.chatMessage.create({
+        data: {
+          matchId,
+          senderId: userId,
+          body
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+              role: true
+            }
           }
         }
-      }
+      });
+
+      // Log chat activity
+      logger.info('Chat message sent', {
+        matchId,
+        senderId: userId,
+        messageId: newMessage.id,
+        bodyLength: body.length
+      });
+
+      return newMessage;
     });
 
     // Emit to chat room
@@ -239,7 +257,7 @@ chatRouter.post(
       select: { id: true }
     });
 
-    const messageIds = unreadMessages.map((msg) => msg.id);
+    const messageIds = unreadMessages.map((msg: any) => msg.id);
 
     if (messageIds.length > 0) {
       await prisma.chatMessage.updateMany({

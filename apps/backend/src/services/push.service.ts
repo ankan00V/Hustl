@@ -30,7 +30,7 @@ export async function notifyUrgentListingNearby(listing: UrgentListingData) {
       AND u."urgentSuspendedUntil" IS NULL OR u."urgentSuspendedUntil" < NOW()
   `;
 
-  const studentIds = nearbyStudents.map((s) => s.userId);
+  const studentIds = nearbyStudents.map((s: any) => s.userId);
 
   if (studentIds.length > 0) {
     emitUrgentListingNearby(studentIds, {
