@@ -54,7 +54,7 @@ export async function broadcastUrgentListing(listing: UrgentListingData) {
     LIMIT 100
   `;
 
-  const studentIds = nearbyStudents.map((s) => s.userId);
+  const studentIds = nearbyStudents.map((s: any) => s.userId);
 
   if (studentIds.length === 0) {
     console.log(`[UrgentBroadcast] No nearby students found for listing ${listing.id}`);
@@ -102,7 +102,7 @@ export async function broadcastUrgentListing(listing: UrgentListingData) {
 
   return {
     studentCount: studentIds.length,
-    students: nearbyStudents.map((s) => ({
+    students: nearbyStudents.map((s: any) => ({
       userId: s.userId,
       distance: Math.round(s.distance),
     })),

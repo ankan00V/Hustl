@@ -156,7 +156,7 @@ export class SmartPricingService {
 
     // Filter by category
     const categoryListings = listings.filter(
-      (l) => l.business.category.toLowerCase() === category.toLowerCase()
+      (l: any) => l.business.category.toLowerCase() === category.toLowerCase()
     );
 
     if (categoryListings.length === 0) {
@@ -164,9 +164,9 @@ export class SmartPricingService {
       return this.getDefaultRates(category);
     }
 
-    const rates = categoryListings.map((l) => Number(l.hourlyRate));
+    const rates = categoryListings.map((l: any) => Number(l.hourlyRate));
 
-    const averageRate = rates.reduce((sum, rate) => sum + rate, 0) / rates.length;
+    const averageRate = rates.reduce((sum: number, rate: number) => sum + rate, 0) / rates.length;
     const minRate = Math.min(...rates);
     const maxRate = Math.max(...rates);
 
@@ -515,9 +515,9 @@ export class SmartPricingService {
       take: limit,
     });
 
-    return listings.map((listing) => {
+    return listings.map((listing: any) => {
       const applications = listing.matches.length;
-      const filled = listing.matches.some((m) => m.status === "ACCEPTED");
+      const filled = listing.matches.some((m: any) => m.status === "ACCEPTED");
 
       // Calculate average time to first application
       const firstApplication = listing.matches[0];
@@ -562,7 +562,7 @@ export class SmartPricingService {
     }
 
     // Analyze fill rate
-    const filledCount = recentListings.filter((l) => l.status === "FILLED").length;
+    const filledCount = recentListings.filter((l: any) => l.status === "FILLED").length;
     const fillRate = filledCount / recentListings.length;
 
     if (fillRate < 0.5) {
@@ -577,17 +577,17 @@ export class SmartPricingService {
 
     // Analyze application speed
     const avgApplicationTimes = recentListings
-      .filter((l) => l.matches.length > 0)
-      .map((l) => {
+      .filter((l: any) => l.matches.length > 0)
+      .map((l: any) => {
         const firstMatch = l.matches[0];
         if (!firstMatch) return 0;
         return (firstMatch.appliedAt.getTime() - l.createdAt.getTime()) / (1000 * 60 * 60);
       })
-      .filter((time) => time > 0);
+      .filter((time: number) => time > 0);
 
     if (avgApplicationTimes.length > 0) {
       const avgTime =
-        avgApplicationTimes.reduce((sum, t) => sum + t, 0) / avgApplicationTimes.length;
+        avgApplicationTimes.reduce((sum: number, t: number) => sum + t, 0) / avgApplicationTimes.length;
 
       if (avgTime < 2) {
         tips.push(
@@ -601,14 +601,14 @@ export class SmartPricingService {
     }
 
     // Analyze urgent vs non-urgent
-    const urgentListings = recentListings.filter((l) => l.isUrgent);
-    const nonUrgentListings = recentListings.filter((l) => !l.isUrgent);
+    const urgentListings = recentListings.filter((l: any) => l.isUrgent);
+    const nonUrgentListings = recentListings.filter((l: any) => !l.isUrgent);
 
     if (urgentListings.length > 0 && nonUrgentListings.length > 0) {
       const urgentFillRate =
-        urgentListings.filter((l) => l.status === "FILLED").length / urgentListings.length;
+        urgentListings.filter((l: any) => l.status === "FILLED").length / urgentListings.length;
       const nonUrgentFillRate =
-        nonUrgentListings.filter((l) => l.status === "FILLED").length /
+        nonUrgentListings.filter((l: any) => l.status === "FILLED").length /
         nonUrgentListings.length;
 
       if (urgentFillRate > nonUrgentFillRate + 0.2) {

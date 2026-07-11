@@ -88,7 +88,7 @@ export const urgentAutoAssignWorker = new Worker<UrgentAutoAssignJobData>(
     let selectedCandidate = null;
     for (const candidate of candidates) {
       const existingMatch = listing.matches.find(
-        (m) => m.studentId === candidate.studentId
+        (m: any) => m.studentId === candidate.studentId
       );
       if (!existingMatch) {
         selectedCandidate = candidate;
@@ -123,7 +123,7 @@ export const urgentAutoAssignWorker = new Worker<UrgentAutoAssignJobData>(
     }
 
     // Create match and update listing status
-    const match = await prisma.$transaction(async (tx) => {
+    const match = await prisma.$transaction(async (tx: any) => {
       // Create match
       const newMatch = await tx.match.create({
         data: {

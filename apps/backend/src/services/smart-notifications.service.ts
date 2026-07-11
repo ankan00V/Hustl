@@ -231,11 +231,11 @@ export class SmartNotificationsService {
 
     // Calculate overall engagement score
     const totalSent = interactions.length;
-    const totalOpened = interactions.filter(i => i.opened).length;
+    const totalOpened = interactions.filter((i: any) => i.opened).length;
     const engagementScore = totalSent > 0 ? (totalOpened / totalSent) * 100 : 50;
 
     // Get last engagement
-    const lastEngagement = interactions.find(i => i.opened)?.created_at || null;
+    const lastEngagement = interactions.find((i: any) => i.opened)?.created_at || null;
 
     return {
       userId,

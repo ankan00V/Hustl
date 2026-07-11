@@ -342,7 +342,7 @@ class VideoProfileService {
 
     // Get view counts
     const videosWithViews = await Promise.all(
-      businesses.map(async (business) => {
+      businesses.map(async (business: any) => {
         const viewsKey = `${this.CACHE_PREFIX}views:${business.id}`;
         const views = parseInt((await redis.get(viewsKey)) || '0');
 
@@ -359,7 +359,7 @@ class VideoProfileService {
     );
 
     // Sort by views and return top N
-    return videosWithViews.sort((a, b) => b.views - a.views).slice(0, limit);
+    return videosWithViews.sort((a: any, b: any) => b.views - a.views).slice(0, limit);
   }
 
   /**
