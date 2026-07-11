@@ -199,3 +199,21 @@ export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type CreateListingInput = z.infer<typeof createListingSchema>;
 export type CheckInInput = z.infer<typeof checkInSchema>;
 export type BoostPurchaseInput = z.infer<typeof boostPurchaseSchema>;
+
+export const signupSchema = z.object({
+  name: z.string().min(2).max(80),
+  email: z.string().email(),
+  phone: z.string().min(10).max(15),
+  password: z.string().min(6),
+  role: z.enum(USER_ROLES),
+  referredBy: z.string().optional()
+});
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string()
+});
+
+export type SignupInput = z.infer<typeof signupSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+

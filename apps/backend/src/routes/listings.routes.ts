@@ -21,6 +21,36 @@ listingsRouter.get(
   })
 );
 
+listingsRouter.get(
+  "/saved",
+  requireAuth,
+  asyncHandler(async (request, response) => {
+    const saved = await prisma.savedListing.findMany({
+      where: { userId: request.user!.id },
+      include: {
+        listing: {
+          include: {
+            business: {
+              select: {
+                businessName: true,
+                isVerified: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    const listings = saved.map((s) => ({
+      ...s.listing,
+      savedAt: s.createdAt
+    }));
+
+    response.json({ listings });
+  })
+);
+
 listingsRouter.post(
   "/",
   requireAuth,
@@ -90,5 +120,90 @@ listingsRouter.delete(
 
     await prisma.listing.update({ where: { id }, data: { status: "CLOSED" } });
     response.status(204).send();
+  })
+);
+
+listingsRouter.post(
+  "/:id/save",
+  requireAuth,
+  validate(routeParams.id, "params"),
+  asyncHandler(async (request, response) => {
+    const { id } = routeParams.id.parse(request.params);
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    if (!listing) {
+      throw new AppError(404, "Listing not found", "LISTING_NOT_FOUND");
+    }
+
+    const savedListing = await prisma.savedListing.upsert({
+      where: {
+        userId_listingId: {
+          userId: request.user!.id,
+          listingId: id
+        }
+      },
+      create: {
+        userId: request.user!.id,
+        listingId: id
+      },
+      update: {}
+    });
+
+    response.status(201).json({ success: true, savedListing });
+  })
+);
+
+listingsRouter.delete(
+  "/:id/save",
+  requireAuth,
+  validate(routeParams.id, "params"),
+  asyncHandler(async (request, response) => {
+    const { id } = routeParams.id.parse(request.params);
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    if (!listing) {
+      throw new AppError(404, "Listing not found", "LISTING_NOT_FOUND");
+    }
+
+    try {
+      await prisma.savedListing.delete({
+        where: {
+          userId_listingId: {
+            userId: request.user!.id,
+            listingId: id
+          }
+        }
+      });
+    } catch (error) {
+      // Ignore if not found
+    }
+
+    response.json({ success: true, message: "Listing unsaved successfully" });
+  })
+);
+
+listingsRouter.post(
+  "/:id/unsave",
+  requireAuth,
+  validate(routeParams.id, "params"),
+  asyncHandler(async (request, response) => {
+    const { id } = routeParams.id.parse(request.params);
+    const listing = await prisma.listing.findUnique({ where: { id } });
+    if (!listing) {
+      throw new AppError(404, "Listing not found", "LISTING_NOT_FOUND");
+    }
+
+    try {
+      await prisma.savedListing.delete({
+        where: {
+          userId_listingId: {
+            userId: request.user!.id,
+            listingId: id
+          }
+        }
+      });
+    } catch (error) {
+      // Ignore if not found
+    }
+
+    response.json({ success: true, message: "Listing unsaved successfully" });
   })
 );

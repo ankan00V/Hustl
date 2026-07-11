@@ -171,6 +171,7 @@ model User {
   fcmToken             String?
   videoProfileUrl      String?
   videoProfilePublicId String?
+  passwordHash         String?
   adminAccount         AdminAccount?
   businessProfile      BusinessProfile?
   studentProfile       StudentProfile?
@@ -187,6 +188,7 @@ model User {
   portfolioAssets      PortfolioAsset[]
   boosts               Boost[]               @relation("StudentBoosts")
   sentMessages         ChatMessage[]         @relation("SentMessages")
+  savedListings        SavedListing[]
 
   @@index([role, reputationScore])
   @@index([urgentSuspendedUntil])
@@ -253,6 +255,7 @@ model Listing {
   scoreSnapshots    MatchScoreSnapshot[]
   boosts            Boost[]                               @relation("ListingBoosts")
   analytics         ListingAnalyticsDaily[]
+  savedListings     SavedListing[]
 
   @@index([businessId, status])
   @@index([isUrgent, status])
@@ -611,4 +614,17 @@ model ListingAnalyticsDaily {
 
   @@unique([listingId, date])
   @@index([listingId, date])
+}
+
+model SavedListing {
+  id        String   @id @default(uuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
 }

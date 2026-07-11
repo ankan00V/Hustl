@@ -20,6 +20,7 @@ import { swipesRouter } from "./routes/swipes.routes.js";
 import { walletRouter } from "./routes/wallet.routes.js";
 import { webhooksRouter } from "./routes/webhooks.routes.js";
 import { adminRoutes } from "./routes/admin.routes.js";
+import { companionRouter } from "./routes/companion.routes.js";
 
 export function createApp() {
   const app = express();
@@ -50,6 +51,8 @@ export function createApp() {
   app.use("/chat", chatRouter);
   app.use("/analytics", analyticsRouter);
   app.use("/admin", adminRoutes);
+  app.use("/companion", companionRouter);
+  app.use("/web", companionRouter);
 
   app.use(errorHandler);
   return app;

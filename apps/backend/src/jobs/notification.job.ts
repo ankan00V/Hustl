@@ -204,6 +204,7 @@ export async function queueSocketNotification(
 export async function closeNotificationQueue(): Promise<void> {
   await notificationQueue.close();
   await notificationWorker.close();
+  await redisConnection.quit();
 }
 
 // Handle worker events

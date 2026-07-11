@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { randomBytes } from "node:crypto";
-import { sendOtpSchema, verifyOtpSchema } from "@hustl/shared";
+import { sendOtpSchema, verifyOtpSchema, signupSchema, loginSchema } from "@hustl/shared";
+import bcrypt from "bcryptjs";
 import { prisma } from "../config/prisma.js";
 import { redis } from "../config/redis.js";
 import { env } from "../config/env.js";
@@ -104,6 +105,134 @@ authRouter.post(
       exists: true,
       user,
       token: signToken(user)
+    });
+  })
+);
+
+authRouter.post(
+  "/signup",
+  authRateLimiter,
+  validate(signupSchema),
+  asyncHandler(async (request, response) => {
+    const input = signupSchema.parse(request.body);
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: input.email },
+          { phone: input.phone }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      throw AppError.badRequest("Email or phone number is already registered", "USER_ALREADY_EXISTS");
+    }
+
+    const hashedPassword = await bcrypt.hash(input.password, 10);
+    const referralCode = `HSTL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+    const user = await prisma.user.create({
+      data: {
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        passwordHash: hashedPassword,
+        role: input.role,
+        referralCode,
+        studentProfile:
+          input.role === "STUDENT"
+            ? { create: { skills: [], portfolioUrls: [], collegeName: "", badges: [], availabilitySlots: [] } }
+            : undefined,
+        businessProfile:
+          input.role === "BUSINESS"
+            ? { create: { businessName: input.name, category: "Local Business", address: "Pending" } }
+            : undefined
+      },
+      select: { id: true, name: true, email: true, phone: true, role: true, reputationScore: true, referralCode: true }
+    });
+
+    if (input.referredBy) {
+      const referrer = await prisma.user.findUnique({
+        where: { referralCode: input.referredBy }
+      });
+      if (referrer && referrer.id !== user.id) {
+        await prisma.referral.create({
+          data: {
+            referrerId: referrer.id,
+            refereeId: user.id,
+            code: input.referredBy,
+            status: "SIGNED_UP"
+          }
+        });
+      }
+    }
+
+    const token = signToken(user);
+    const refreshToken = randomBytes(32).toString("hex");
+    const refreshKey = `hustl:session:${refreshToken}`;
+    await redis.setex(
+      refreshKey,
+      30 * 24 * 60 * 60,
+      JSON.stringify({ userId: user.id, role: user.role })
+    );
+
+    response.status(201).json({
+      user,
+      token,
+      refreshToken
+    });
+  })
+);
+
+authRouter.post(
+  "/login",
+  authRateLimiter,
+  validate(loginSchema),
+  asyncHandler(async (request, response) => {
+    const input = loginSchema.parse(request.body);
+
+    const user = await prisma.user.findUnique({
+      where: { email: input.email }
+    });
+
+    if (!user) {
+      throw AppError.unauthorized("Invalid email or password", "AUTH_FAILED");
+    }
+
+    if (!user.passwordHash) {
+      throw AppError.badRequest("This account does not have password login configured. Please use OTP verification.", "OTP_LOGIN_REQUIRED");
+    }
+
+    const isMatch = await bcrypt.compare(input.password, user.passwordHash);
+    if (!isMatch) {
+      throw AppError.unauthorized("Invalid email or password", "AUTH_FAILED");
+    }
+
+    const userPayload = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      reputationScore: user.reputationScore,
+      referralCode: user.referralCode
+    };
+
+    const token = signToken(userPayload);
+    const refreshToken = randomBytes(32).toString("hex");
+    const refreshKey = `hustl:session:${refreshToken}`;
+    await redis.setex(
+      refreshKey,
+      30 * 24 * 60 * 60,
+      JSON.stringify({ userId: user.id, role: user.role })
+    );
+
+    response.json({
+      user: userPayload,
+      token,
+      refreshToken
     });
   })
 );
