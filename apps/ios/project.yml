@@ -1,0 +1,34 @@
+name: Hustl
+options:
+  bundleIdPrefix: com.hustl
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  Hustl:
+    type: application
+    platform: iOS
+    sources: [Hustl]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.hustl.app
+        SWIFT_VERSION: 5.0
+        DEVELOPMENT_TEAM: ""
+  HustlTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [HustlTests]
+    dependencies:
+      - target: Hustl
+    settings:
+      base:
+        SWIFT_VERSION: 5.0
+  HustlUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [HustlUITests]
+    dependencies:
+      - target: Hustl
+    settings:
+      base:
+        SWIFT_VERSION: 5.0
